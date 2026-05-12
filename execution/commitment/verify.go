@@ -101,7 +101,7 @@ func VerifyBranchHashes(
 				}
 				c.Nonce = acc.Nonce
 				c.Balance.Set(&acc.Balance)
-				c.CodeHash = acc.CodeHash.Value()
+				c.CodeHash = acc.CodeHash
 				if c.CodeHash == (common.Hash{}) {
 					c.CodeHash = empty.CodeHash
 				}

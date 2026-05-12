@@ -801,7 +801,7 @@ func (vals *ValidatorSet) Difficulty(signer accounts.Address) (uint64, error) {
 // SafeDifficulty returns the difficulty for a particular signer at the current snapshot number if available,
 // otherwise it returns 1 for empty signer and 0 if it is not in the validator set.
 func (vals *ValidatorSet) SafeDifficulty(signer accounts.Address) uint64 {
-	if signer.IsZero() {
+	if signer == (accounts.Address{}) {
 		return 1
 	}
 
@@ -826,8 +826,7 @@ func (vals *ValidatorSet) GetSignerSuccessionNumber(signer accounts.Address, num
 
 	signerIndex, _ := vals.GetByAddress(signer)
 	if signerIndex < 0 {
-		signerValue := signer.Value()
-		return -1, &UnauthorizedSignerError{Number: number, Signer: signerValue[:]}
+		return -1, &UnauthorizedSignerError{Number: number, Signer: signer[:]}
 	}
 
 	indexDiff := signerIndex - proposerIndex

@@ -109,14 +109,13 @@ func (s *Stateless) ReadAccountDataForDebug(address accounts.Address) (*accounts
 // ReadAccountData is a part of the StateReader interface
 // This implementation attempts to look up account data in the state trie, and fails if it is not found
 func (s *Stateless) ReadAccountData(address accounts.Address) (*accounts.Account, error) {
-	addrValue := address.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return nil, err
 	}
 	acc, ok := s.t.GetAccount(addrHash[:])
 	if s.trace {
-		fmt.Printf("Stateless: ReadAccountData(address=%x) --> %v\n", addrValue[:], acc)
+		fmt.Printf("Stateless: ReadAccountData(address=%x) --> %v\n", address[:], acc)
 	}
 	if ok {
 		return acc, nil
@@ -127,17 +126,15 @@ func (s *Stateless) ReadAccountData(address accounts.Address) (*accounts.Account
 // ReadAccountStorage is a part of the StateReader interface
 // This implementation attempts to look up the storage in the state trie, and fails if it is not found
 func (s *Stateless) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addrValue := address.Value()
-	keyValue := key.Value()
 	if s.trace {
-		fmt.Printf("Stateless: ReadAccountStorage(address=%x, key=%x)\n", addrValue[:], keyValue[:])
+		fmt.Printf("Stateless: ReadAccountStorage(address=%x, key=%x)\n", address[:], key[:])
 	}
-	seckey, err := common.HashData(keyValue[:])
+	seckey, err := common.HashData(key[:])
 	if err != nil {
 		return uint256.Int{}, false, err
 	}
 
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return uint256.Int{}, false, err
 	}
@@ -152,8 +149,7 @@ func (s *Stateless) ReadAccountStorage(address accounts.Address, key accounts.St
 }
 
 func (s *Stateless) HasStorage(address accounts.Address) (bool, error) {
-	addrValue := address.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return false, err
 	}
@@ -181,8 +177,7 @@ func (s *Stateless) ReadAccountCode(address accounts.Address) (code []byte, err 
 	if s.trace {
 		fmt.Printf("Getting code for address %x\n", address)
 	}
-	addrValue := address.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return nil, err
 	}
@@ -201,8 +196,7 @@ func (s *Stateless) ReadAccountCode(address accounts.Address) (code []byte, err 
 // This implementation looks the code up in the codeMap, and returns its size
 // It fails if the code is not found in the map
 func (s *Stateless) ReadAccountCodeSize(address accounts.Address) (codeSize int, err error) {
-	addrValue := address.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return 0, err
 	}
@@ -229,8 +223,7 @@ func (s *Stateless) ReadAccountIncarnation(address accounts.Address) (uint64, er
 // UpdateAccountData is a part of the StateWriter interface
 // This implementation registers the account update in the `accountUpdates` map
 func (s *Stateless) UpdateAccountData(address accounts.Address, original, account *accounts.Account) error {
-	addrValue := address.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return err
 	}
@@ -244,8 +237,7 @@ func (s *Stateless) UpdateAccountData(address accounts.Address, original, accoun
 // DeleteAccount is a part of the StateWriter interface
 // This implementation registers the deletion of the account in two internal maps
 func (s *Stateless) DeleteAccount(address accounts.Address, original *accounts.Account) error {
-	addrValue := address.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return err
 	}
@@ -260,7 +252,7 @@ func (s *Stateless) DeleteAccount(address accounts.Address, original *accounts.A
 // UpdateAccountCode is a part of the StateWriter interface
 // This implementation adds the code to the codeMap to make it available for further accesses
 func (s *Stateless) UpdateAccountCode(address accounts.Address, incarnation uint64, codeHash accounts.CodeHash, code []byte) error {
-	s.codeUpdates[codeHash.Value()] = code
+	s.codeUpdates[codeHash] = code
 
 	if s.trace {
 		fmt.Printf("Stateless: UpdateAccountCode %x codeHash %x\n", address, codeHash)
@@ -271,9 +263,8 @@ func (s *Stateless) UpdateAccountCode(address accounts.Address, incarnation uint
 // WriteAccountStorage is a part of the StateWriter interface
 // This implementation registeres the change of the account's storage in the internal double map `storageUpdates`
 func (s *Stateless) WriteAccountStorage(address accounts.Address, incarnation uint64, key accounts.StorageKey, original, value uint256.Int) error {
-	addrValue := address.Value()
-	keyValue := key.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	keyValue := key
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return err
 	}
@@ -299,8 +290,7 @@ func (s *Stateless) WriteAccountStorage(address accounts.Address, incarnation ui
 // CreateContract is a part of StateWriter interface
 // This implementation registers given address in the internal map `created`
 func (s *Stateless) CreateContract(address accounts.Address) error {
-	addrValue := address.Value()
-	addrHash, err := common.HashData(addrValue[:])
+	addrHash, err := common.HashData(address[:])
 	if err != nil {
 		return err
 	}

@@ -47,8 +47,7 @@ func CreateAddress2(b common.Address, salt [32]byte, inithash accounts.CodeHash)
 	buf[0] = 0xff
 	copy(buf[1:], b[:])
 	copy(buf[1+length.Addr:], salt[:])
-	initHashValue := inithash.Value()
-	copy(buf[1+length.Addr+length.Hash:], initHashValue[:])
+	copy(buf[1+length.Addr+length.Hash:], inithash[:])
 	h := crypto.HashData(buf[:])
 	return common.Address(h[12:])
 }

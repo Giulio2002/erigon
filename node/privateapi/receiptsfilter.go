@@ -209,7 +209,7 @@ func receiptNotificationToProto(rn *notifications.ReceiptNotification) *remotepr
 	if rn.Tx != nil {
 		signer := types.MakeSigner(nil, blockNum, 0)
 		if sender, err := rn.Tx.Sender(*signer); err == nil {
-			protoReceipt.From = gointerfaces.ConvertAddressToH160(sender.Value())
+			protoReceipt.From = gointerfaces.ConvertAddressToH160(sender)
 		}
 		if to := rn.Tx.GetTo(); to != nil {
 			protoReceipt.To = gointerfaces.ConvertAddressToH160(*to)

@@ -258,7 +258,7 @@ func (hb *HashBuilder) accountLeaf(length int, keyHex []byte, balance *uint256.I
 		var codeHashValue common.Hash
 		copy(codeHashValue[:], hb.hashStack[len(hb.hashStack)-popped*hashStackStride-length2.Hash:len(hb.hashStack)-popped*hashStackStride])
 		var ok bool
-		if codeHashValue != accounts.EmptyCodeHash.Value() {
+		if codeHashValue != accounts.EmptyCodeHash {
 			stackTop := hb.nodeStack[len(hb.nodeStack)-popped-1]
 			if stackTop != nil { // if we don't have any stack top it might be okay because we didn't resolve the code yet (stateful resolver)
 				// but if we have something on top of the stack that isn't `nil`, it has to be a codeNode

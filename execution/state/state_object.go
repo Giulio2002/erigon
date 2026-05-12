@@ -111,7 +111,7 @@ func newObject(db *IntraBlockState, address accounts.Address, data, original *ac
 	so.address = address
 	so.data.Copy(data)
 
-	if so.data.CodeHash.IsEmpty() {
+	if so.data.CodeHash == accounts.EmptyCodeHash || so.data.CodeHash == (common.Hash{}) {
 		so.data.CodeHash = accounts.EmptyCodeHash
 	}
 	if so.data.Root == (common.Hash{}) {
@@ -184,14 +184,14 @@ func (so *stateObject) GetCommittedState(key accounts.StorageKey) (uint256.Int, 
 		}
 	}
 	if so.createdContract {
-		if dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address.Handle())) {
+		if dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address)) {
 			fmt.Printf("%d (%d.%d) GetCommittedState SKIP (createdContract) %x key=%x\n",
 				so.db.blockNum, so.db.txIndex, so.db.version, so.address, key)
 		}
 		return uint256.Int{}, nil
 	}
 	// Load from DB in case it is missing.
-	if dbg.TraceDomainIO || (dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address.Handle()))) {
+	if dbg.TraceDomainIO || (dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address))) {
 		so.db.stateReader.SetTrace(true, fmt.Sprintf("%d (%d.%d)", so.db.blockNum, so.db.txIndex, so.db.version))
 	}
 	var readStart time.Time
@@ -353,7 +353,7 @@ func (so *stateObject) applyStorageChanges(stateWriter StateWriter, updatedStora
 		} else {
 			originValue = so.originStorage[key]
 		}
-		if dbg.TraceDomainIO || (dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address.Handle()))) {
+		if dbg.TraceDomainIO || (dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address))) {
 			if _, ok := stateWriter.(*NoopWriter); !ok || dbg.TraceNoopIO {
 				fmt.Printf("%d (%d.%d) Update Storage (%T): %x,%x,%s->%s\n", so.db.blockNum, so.db.txIndex, so.db.version,
 					stateWriter, so.address, key, originValue.Hex(), value.Hex())
@@ -410,7 +410,7 @@ func (so *stateObject) Code() ([]byte, error) {
 	if so.code != nil {
 		return so.code, nil
 	}
-	if so.data.CodeHash.IsEmpty() {
+	if so.data.CodeHash == accounts.EmptyCodeHash || so.data.CodeHash == (common.Hash{}) {
 		return nil, nil
 	}
 
@@ -426,7 +426,7 @@ func (so *stateObject) Code() ([]byte, error) {
 			}
 		}
 	}
-	if dbg.TraceDomainIO || (dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address.Handle()))) {
+	if dbg.TraceDomainIO || (dbg.TraceTransactionIO && (so.db.trace || dbg.TraceAccount(so.address))) {
 		so.db.stateReader.SetTrace(true, fmt.Sprintf("%d (%d.%d)", so.db.blockNum, so.db.txIndex, so.db.version))
 	}
 	var readStart time.Time

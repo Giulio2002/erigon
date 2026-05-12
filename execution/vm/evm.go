@@ -268,7 +268,7 @@ func (evm *EVM) call(typ OpCode, caller accounts.Address, callerAddress accounts
 	depth := evm.depth
 
 	version := evm.intraBlockState.Version()
-	if (dbg.TraceTransactionIO && !dbg.TraceInstructions) && (evm.intraBlockState.Trace() || dbg.TraceAccount(caller.Handle())) {
+	if (dbg.TraceTransactionIO && !dbg.TraceInstructions) && (evm.intraBlockState.Trace() || dbg.TraceAccount(caller)) {
 		fmt.Printf("%d (%d.%d) %s: %x %x\n", evm.intraBlockState.BlockNumber(), version.TxIndex, version.Incarnation, typ, addr, input)
 		defer func() {
 			fmt.Printf("%d (%d.%d) RETURN (%s): %x: %x, %d, %v\n", evm.intraBlockState.BlockNumber(), version.TxIndex, version.Incarnation, typ, addr, ret, leftOverGas, err)
@@ -479,7 +479,7 @@ func NewCodeAndHash(code []byte) *codeAndHash {
 }
 
 func (c *codeAndHash) Hash() accounts.CodeHash {
-	if c.hash.IsZero() {
+	if c.hash == (common.Hash{}) {
 		c.hash = accounts.InternCodeHash(crypto.HashData(c.code))
 	}
 	return c.hash
@@ -491,7 +491,7 @@ func (evm *EVM) OverlayCreate(caller accounts.Address, codeAndHash *codeAndHash,
 
 // create creates a new contract using code as deployment code.
 func (evm *EVM) create(caller accounts.Address, codeAndHash *codeAndHash, gasRemaining mdgas.MdGas, value uint256.Int, address accounts.Address, typ OpCode, incrementNonce bool, bailout bool) (ret []byte, createAddress accounts.Address, leftOverGas mdgas.MdGas, err error) {
-	if dbg.TraceTransactionIO && (evm.intraBlockState.Trace() || dbg.TraceAccount(caller.Handle())) {
+	if dbg.TraceTransactionIO && (evm.intraBlockState.Trace() || dbg.TraceAccount(caller)) {
 		defer func() {
 			version := evm.intraBlockState.Version()
 			if err != nil {
@@ -563,7 +563,7 @@ func (evm *EVM) create(caller accounts.Address, codeAndHash *codeAndHash, gasRem
 	if err != nil {
 		return nil, accounts.NilAddress, mdgas.MdGas{}, fmt.Errorf("%w: %w", ErrIntraBlockStateFailed, err)
 	}
-	if nonce != 0 || !contractHash.IsEmpty() || hasStorage {
+	if nonce != 0 || contractHash != accounts.EmptyCodeHash && contractHash != (common.Hash{}) || hasStorage {
 		err = ErrContractAddressCollision
 		// EIP-8037: At depth > 0, track collision-burned gas in regularGasConsumed
 		// so 2D block gas accounting reflects the gas consumed on EIP-684 collision.
@@ -687,14 +687,14 @@ func (evm *EVM) Create(caller accounts.Address, code []byte, gasRemaining mdgas.
 	op := CREATE
 	if salt != nil {
 		op = CREATE2
-		contractAddr = accounts.InternAddress(types.CreateAddress2(caller.Value(), salt.Bytes32(), ch.Hash()))
+		contractAddr = accounts.InternAddress(types.CreateAddress2(caller, salt.Bytes32(), ch.Hash()))
 	} else {
 		var nonce uint64
 		nonce, err = evm.intraBlockState.GetNonce(caller)
 		if err != nil {
 			return nil, accounts.NilAddress, mdgas.MdGas{}, err
 		}
-		contractAddr = accounts.InternAddress(types.CreateAddress(caller.Value(), nonce))
+		contractAddr = accounts.InternAddress(types.CreateAddress(caller, nonce))
 	}
 	return evm.create(caller, ch, gasRemaining, endowment, contractAddr, op, true /* incrementNonce */, bailout)
 }

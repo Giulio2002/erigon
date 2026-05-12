@@ -470,7 +470,7 @@ func TestEngineApiBuiltBlockWithWithdrawalRequest(t *testing.T) {
 		gasPriceU256, _ := uint256.FromBig(gasPrice)
 
 		// Send tx to withdrawal request contract with 0.5 ETH.
-		withdrawalRequestAddr := params.WithdrawalRequestAddress.Value()
+		withdrawalRequestAddr := params.WithdrawalRequestAddress
 		txn := &types.LegacyTx{
 			CommonTx: types.CommonTx{
 				Nonce:    nonce.Uint64(),

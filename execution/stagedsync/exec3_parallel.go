@@ -980,7 +980,7 @@ func (pe *parallelExecutor) processRequest(ctx context.Context, execRequest *exe
 			if err != nil {
 				return err
 			}
-			if !sender.IsNil() {
+			if sender != accounts.NilAddress {
 				if tx, ok := prevSenderTx[sender]; ok {
 					executor.execTasks.addDependency(tx, i)
 					executor.execTasks.clearPending(i)
@@ -1369,7 +1369,7 @@ func (result *execResult) finalize(prevReceipt *types.Receipt, engine rules.Engi
 	txIncarnation := task.Version().Incarnation
 
 	txTrace := dbg.TraceTransactionIO &&
-		(dbg.TraceTx(blockNum, txIndex) || dbg.TraceAccount(result.Coinbase.Handle()) || dbg.TraceAccount(result.ExecutionResult.BurntContractAddress.Handle()))
+		(dbg.TraceTx(blockNum, txIndex) || dbg.TraceAccount(result.Coinbase) || dbg.TraceAccount(result.ExecutionResult.BurntContractAddress))
 
 	var tracePrefix string
 	if txTrace {
@@ -1496,7 +1496,7 @@ func (result *execResult) finalizeWithIBS(
 			}
 		}
 	}
-	if !hasBurntDelta && !result.ExecutionResult.BurntContractAddress.IsNil() && txTask.Config.IsLondon(blockNum) {
+	if !hasBurntDelta && result.ExecutionResult.BurntContractAddress != accounts.NilAddress && txTask.Config.IsLondon(blockNum) {
 		if err := ibs.AddBalance(result.ExecutionResult.BurntContractAddress, result.ExecutionResult.FeeBurnt, tracing.BalanceDecreaseGasBuy); err != nil {
 			return nil, nil, nil, err
 		}
@@ -1626,7 +1626,7 @@ func (result *execResult) finalizeTx(
 	var newBurntBalance uint256.Int
 	var burntAcc *accounts.Account
 	burntAddr := result.ExecutionResult.BurntContractAddress
-	hasBurnt := !burntAddr.IsNil()
+	hasBurnt := burntAddr != accounts.NilAddress
 	if hasBurnt {
 		var err error
 		burntAcc, err = vsReader.ReadAccountData(burntAddr)
@@ -1897,7 +1897,7 @@ func (result *execResult) finalizeTxSimple(
 	var newBurntBalance uint256.Int
 	var burntAcc *accounts.Account
 	burntAddr := result.ExecutionResult.BurntContractAddress
-	hasBurnt := !burntAddr.IsNil()
+	hasBurnt := burntAddr != accounts.NilAddress
 	if hasBurnt {
 		burntAcc, err = vsReader.ReadAccountData(burntAddr)
 		if err != nil {
@@ -3258,7 +3258,7 @@ func normalizeWriteSet(writes state.VersionedWrites, vm *state.VersionMap, txInd
 	emptyAddrs := make(map[accounts.Address]bool)
 	for addr, s := range acctStates {
 		if s.hasBal && s.hasNonce && s.hasCode &&
-			s.balance.IsZero() && s.nonce == 0 && s.codeHash.IsEmpty() {
+			s.balance.IsZero() && s.nonce == 0 && (s.codeHash == accounts.EmptyCodeHash || s.codeHash == (common.Hash{})) {
 			emptyAddrs[addr] = true
 		}
 	}
@@ -3333,8 +3333,8 @@ func resolveStorageWrites(writes state.VersionedWrites, vm *state.VersionMap, tx
 					// At this point sd.mem may have accumulated writes from
 					// prior TXs, but for THIS specific key (no prior TX wrote it),
 					// GetLatest returns the pre-block value.
-					addr := w.Address.Value()
-					slot := w.Key.Value()
+					addr := w.Address
+					slot := w.Key
 					composite := append(addr[:], slot[:]...)
 					preBlock, _, err := rs.Domains().GetLatest(kv.StorageDomain, nil, composite)
 					if err == nil {

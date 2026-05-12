@@ -343,12 +343,12 @@ func fillForkConfig(chainConfig *chain.Config, forkId [4]byte, activationTime ui
 	precompiles := vm.Precompiles(blockContext.Rules(chainConfig))
 	forkConfig.Precompiles = make(map[string]common.Address, len(precompiles))
 	for addr, precompile := range precompiles {
-		forkConfig.Precompiles[precompile.Name()] = addr.Value()
+		forkConfig.Precompiles[precompile.Name()] = addr
 	}
 	systemContracts := chainConfig.SystemContracts(activationTime)
 	forkConfig.SystemContracts = make(map[string]common.Address, len(systemContracts))
 	for name, contract := range systemContracts {
-		forkConfig.SystemContracts[name] = contract.Value()
+		forkConfig.SystemContracts[name] = contract
 	}
 	return &forkConfig
 }

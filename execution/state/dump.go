@@ -186,9 +186,8 @@ func (d *Dumper) DumpToCollector(ctx context.Context, c DumpCollector, excludeCo
 			CodeHash: hexutil.Bytes(empty.CodeHash[:]),
 			Storage:  make(map[string]string),
 		}
-		if !acc.CodeHash.IsEmpty() {
-			codeHashValue := acc.CodeHash.Value()
-			account.CodeHash = hexutil.Bytes(codeHashValue[:])
+		if acc.CodeHash != accounts.EmptyCodeHash && acc.CodeHash != (common.Hash{}) {
+			account.CodeHash = hexutil.Bytes(acc.CodeHash[:])
 
 			if !excludeCode {
 				r, _, err := ttx.GetLatest(kv.CodeDomain, k)

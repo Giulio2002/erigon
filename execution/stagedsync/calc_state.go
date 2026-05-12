@@ -34,7 +34,7 @@ type calcDomainReader struct {
 }
 
 func (r *calcDomainReader) ReadAccountData(addr accounts.Address) (*accounts.Account, error) {
-	addrVal := addr.Value()
+	addrVal := addr
 	enc, _, err := r.reader.Read(kv.AccountsDomain, addrVal[:], 0)
 	if err != nil {
 		return nil, err
@@ -50,8 +50,8 @@ func (r *calcDomainReader) ReadAccountData(addr accounts.Address) (*accounts.Acc
 }
 
 func (r *calcDomainReader) ReadAccountStorage(addr accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addrVal := addr.Value()
-	keyVal := key.Value()
+	addrVal := addr
+	keyVal := key
 	composite := make([]byte, 20+32)
 	copy(composite, addrVal[:])
 	copy(composite[20:], keyVal[:])
@@ -124,7 +124,7 @@ func (cs *calcState) ensureAccount(addr accounts.Address) *calcAccountState {
 			// Sticky — recorded so the next compute fails fast instead of
 			// silently producing wrong updates on top of zero state.
 			if cs.lazyLoadErr == nil {
-				cs.lazyLoadErr = fmt.Errorf("ensureAccount(%x): %w", addr.Value(), err)
+				cs.lazyLoadErr = fmt.Errorf("ensureAccount(%x): %w", addr, err)
 			}
 			if cs.logger != nil {
 				cs.logger.Warn("["+cs.logPrefix+"] commitmentCalculator: lazy-load ReadAccountData failed", "addr", addr, "err", err)
@@ -132,7 +132,7 @@ func (cs *calcState) ensureAccount(addr accounts.Address) *calcAccountState {
 		} else if dbAcc != nil {
 			acc.Balance = dbAcc.Balance
 			acc.Nonce = dbAcc.Nonce
-			acc.CodeHash = dbAcc.CodeHash.Value()
+			acc.CodeHash = dbAcc.CodeHash
 		}
 	}
 	cs.accounts[addr] = acc
@@ -156,7 +156,7 @@ func (cs *calcState) ensureStorage(addr accounts.Address, key accounts.StorageKe
 		if err != nil {
 			// See ensureAccount: sticky so the next compute fails fast.
 			if cs.lazyLoadErr == nil {
-				cs.lazyLoadErr = fmt.Errorf("ensureStorage(%x/%x): %w", addr.Value(), key.Value(), err)
+				cs.lazyLoadErr = fmt.Errorf("ensureStorage(%x/%x): %w", addr, key, err)
 			}
 			if cs.logger != nil {
 				cs.logger.Warn("["+cs.logPrefix+"] commitmentCalculator: lazy-load ReadAccountStorage failed", "addr", addr, "key", key, "err", err)
@@ -237,9 +237,9 @@ func (cs *calcState) ApplyWrites(writes state.VersionedWrites) {
 		case state.CodeHashPath:
 			acc := cs.ensureAccount(w.Address)
 			v := w.Val.(accounts.CodeHash)
-			acc.CodeHash = v.Value()
+			acc.CodeHash = v
 			acc.dirty = true
-			if v.Value() != empty.CodeHash {
+			if v != empty.CodeHash {
 				acc.Deleted = false
 			}
 		case state.CodePath:
@@ -298,7 +298,7 @@ func (cs *calcState) FlushToUpdates(updates *commitment.Updates) {
 		if !acc.dirty {
 			continue
 		}
-		address := addr.Value()
+		address := addr
 		key := string(address[:])
 
 		// Three flavours of "Deleted" writeset, distinguished by whether
@@ -348,11 +348,11 @@ func (cs *calcState) FlushToUpdates(updates *commitment.Updates) {
 	}
 
 	for addr, dirtySlots := range cs.storageDirty {
-		address := addr.Value()
+		address := addr
 		slots := cs.storageState[addr]
 		for key := range dirtySlots {
 			val := slots[key]
-			keyVal := key.Value()
+			keyVal := key
 			composite := make([]byte, 20+32)
 			copy(composite, address[:])
 			copy(composite[20:], keyVal[:])

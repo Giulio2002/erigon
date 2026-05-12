@@ -106,7 +106,7 @@ func (s *RecordingState) tracing(addr common.Address) bool {
 // --- StateReader implementation ---
 
 func (s *RecordingState) ReadAccountData(address accounts.Address) (*accounts.Account, error) {
-	addr := address.Value()
+	addr := address
 	s.AccessedAccounts[addr] = struct{}{}
 	// Check overlay: deleted accounts return nil
 	if _, deleted := s.DeletedAccounts[addr]; deleted {
@@ -133,7 +133,7 @@ func (s *RecordingState) ReadAccountData(address accounts.Address) (*accounts.Ac
 }
 
 func (s *RecordingState) ReadAccountDataForDebug(address accounts.Address) (*accounts.Account, error) {
-	addr := address.Value()
+	addr := address
 	s.AccessedAccounts[addr] = struct{}{}
 	if _, deleted := s.DeletedAccounts[addr]; deleted {
 		if s.tracing(addr) {
@@ -159,38 +159,38 @@ func (s *RecordingState) ReadAccountDataForDebug(address accounts.Address) (*acc
 }
 
 func (s *RecordingState) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addr := address.Value()
+	addr := address
 	s.AccessedAccounts[addr] = struct{}{}
 	if s.AccessedStorage[addr] == nil {
 		s.AccessedStorage[addr] = make(map[common.Hash]struct{})
 	}
-	s.AccessedStorage[addr][key.Value()] = struct{}{}
+	s.AccessedStorage[addr][key] = struct{}{}
 	// Deleted accounts have no storage
 	if _, deleted := s.DeletedAccounts[addr]; deleted {
 		if s.tracing(addr) {
-			fmt.Printf("[TRACE] ReadAccountStorage %s key=%s -> deleted\n", addr.Hex(), key.Value().Hex())
+			fmt.Printf("[TRACE] ReadAccountStorage %s key=%s -> deleted\n", addr.Hex(), key.Hex())
 		}
 		return uint256.Int{}, false, nil
 	}
 	// Check if this storage slot has been written in the overlay
 	if mods, ok := s.ModifiedStorage[addr]; ok {
-		if _, modified := mods[key.Value()]; modified {
-			val := s.storageOverlay[addr][key.Value()]
+		if _, modified := mods[key]; modified {
+			val := s.storageOverlay[addr][key]
 			if s.tracing(addr) {
-				fmt.Printf("[TRACE] ReadAccountStorage %s key=%s -> overlay val=%d\n", addr.Hex(), key.Value().Hex(), &val)
+				fmt.Printf("[TRACE] ReadAccountStorage %s key=%s -> overlay val=%d\n", addr.Hex(), key.Hex(), &val)
 			}
 			return val, !val.IsZero(), nil
 		}
 	}
 	val, ok, err := s.inner.ReadAccountStorage(address, key)
 	if s.tracing(addr) {
-		fmt.Printf("[TRACE] ReadAccountStorage %s key=%s -> inner val=%d ok=%v err=%v\n", addr.Hex(), key.Value().Hex(), &val, ok, err)
+		fmt.Printf("[TRACE] ReadAccountStorage %s key=%s -> inner val=%d ok=%v err=%v\n", addr.Hex(), key.Hex(), &val, ok, err)
 	}
 	return val, ok, err
 }
 
 func (s *RecordingState) HasStorage(address accounts.Address) (bool, error) {
-	addr := address.Value()
+	addr := address
 	s.AccessedAccounts[addr] = struct{}{}
 	// Check overlay for any non-zero storage
 	if mods, ok := s.storageOverlay[addr]; ok {
@@ -217,7 +217,7 @@ func (s *RecordingState) HasStorage(address accounts.Address) (bool, error) {
 }
 
 func (s *RecordingState) ReadAccountCode(address accounts.Address) ([]byte, error) {
-	addr := address.Value()
+	addr := address
 	s.AccessedAccounts[addr] = struct{}{}
 	if _, deleted := s.DeletedAccounts[addr]; deleted {
 		if s.tracing(addr) {
@@ -251,7 +251,7 @@ func (s *RecordingState) ReadAccountCode(address accounts.Address) ([]byte, erro
 }
 
 func (s *RecordingState) ReadAccountCodeSize(address accounts.Address) (int, error) {
-	addr := address.Value()
+	addr := address
 	s.AccessedAccounts[addr] = struct{}{}
 	if _, deleted := s.DeletedAccounts[addr]; deleted {
 		if s.tracing(addr) {
@@ -277,7 +277,7 @@ func (s *RecordingState) ReadAccountCodeSize(address accounts.Address) (int, err
 }
 
 func (s *RecordingState) ReadAccountIncarnation(address accounts.Address) (uint64, error) {
-	addr := address.Value()
+	addr := address
 	s.AccessedAccounts[addr] = struct{}{}
 	inc, err := s.inner.ReadAccountIncarnation(address)
 	if s.tracing(addr) {
@@ -302,7 +302,7 @@ func (s *RecordingState) TracePrefix() string {
 // --- StateWriter implementation ---
 
 func (s *RecordingState) UpdateAccountData(address accounts.Address, original, account *accounts.Account) error {
-	addr := address.Value()
+	addr := address
 	s.ModifiedAccounts[addr] = struct{}{}
 	// Store a copy in the overlay
 	acctCopy := *account
@@ -315,7 +315,7 @@ func (s *RecordingState) UpdateAccountData(address accounts.Address, original, a
 }
 
 func (s *RecordingState) UpdateAccountCode(address accounts.Address, incarnation uint64, codeHash accounts.CodeHash, code []byte) error {
-	addr := address.Value()
+	addr := address
 	s.ModifiedAccounts[addr] = struct{}{}
 	s.codeOverlay[addr] = common.Copy(code)
 	s.ModifiedCode[addr] = common.Copy(code)
@@ -331,7 +331,7 @@ func (s *RecordingState) UpdateAccountCode(address accounts.Address, incarnation
 }
 
 func (s *RecordingState) DeleteAccount(address accounts.Address, original *accounts.Account) error {
-	addr := address.Value()
+	addr := address
 	s.ModifiedAccounts[addr] = struct{}{}
 	s.DeletedAccounts[addr] = struct{}{}
 	delete(s.accountOverlay, addr)
@@ -345,25 +345,25 @@ func (s *RecordingState) DeleteAccount(address accounts.Address, original *accou
 }
 
 func (s *RecordingState) WriteAccountStorage(address accounts.Address, incarnation uint64, key accounts.StorageKey, original, value uint256.Int) error {
-	addr := address.Value()
+	addr := address
 	s.ModifiedAccounts[addr] = struct{}{}
 	if s.ModifiedStorage[addr] == nil {
 		s.ModifiedStorage[addr] = make(map[common.Hash]struct{})
 	}
-	s.ModifiedStorage[addr][key.Value()] = struct{}{}
+	s.ModifiedStorage[addr][key] = struct{}{}
 	// Store in overlay
 	if s.storageOverlay[addr] == nil {
 		s.storageOverlay[addr] = make(map[common.Hash]uint256.Int)
 	}
-	s.storageOverlay[addr][key.Value()] = value
+	s.storageOverlay[addr][key] = value
 	if s.tracing(addr) {
-		fmt.Printf("[TRACE] WriteAccountStorage %s key=%s val=%d\n", addr.Hex(), key.Value().Hex(), &value)
+		fmt.Printf("[TRACE] WriteAccountStorage %s key=%s val=%d\n", addr.Hex(), key.Hex(), &value)
 	}
 	return nil
 }
 
 func (s *RecordingState) CreateContract(address accounts.Address) error {
-	addr := address.Value()
+	addr := address
 	s.ModifiedAccounts[addr] = struct{}{}
 	s.CreatedContracts[addr] = struct{}{}
 	delete(s.DeletedAccounts, addr)
@@ -1165,7 +1165,7 @@ func (s *witnessStateless) ReadAccountDataForDebug(address accounts.Address) (*a
 }
 
 func (s *witnessStateless) ReadAccountData(address accounts.Address) (*accounts.Account, error) {
-	addr := address.Value()
+	addr := address
 	addrHash, err := common.HashData(addr[:])
 	if err != nil {
 		return nil, err
@@ -1207,8 +1207,8 @@ func (s *witnessStateless) ReadAccountData(address accounts.Address) (*accounts.
 }
 
 func (s *witnessStateless) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addr := address.Value()
-	keyValue := key.Value()
+	addr := address
+	keyValue := key
 
 	addrHash, err := common.HashData(addr[:])
 	if err != nil {
@@ -1258,7 +1258,7 @@ func (s *witnessStateless) ReadAccountStorage(address accounts.Address, key acco
 }
 
 func (s *witnessStateless) ReadAccountCode(address accounts.Address) ([]byte, error) {
-	addr := address.Value()
+	addr := address
 	addrHash, err := common.HashData(addr[:])
 	if err != nil {
 		return nil, err
@@ -1270,7 +1270,7 @@ func (s *witnessStateless) ReadAccountCode(address accounts.Address) ([]byte, er
 		return nil, err
 	}
 	if acc != nil {
-		codeHashValue := acc.CodeHash.Value()
+		codeHashValue := acc.CodeHash
 		if code, ok := s.codeUpdates[codeHashValue]; ok {
 			if s.tracing(addr) {
 				fmt.Printf("[TRACE-S] ReadAccountCode %s -> codeUpdates len=%d\n", addr.Hex(), len(code))
@@ -1289,7 +1289,7 @@ func (s *witnessStateless) ReadAccountCode(address accounts.Address) ([]byte, er
 
 	// Check code map (from witness)
 	if acc != nil {
-		codeHashValue := acc.CodeHash.Value()
+		codeHashValue := acc.CodeHash
 		if code, ok := s.codeMap[codeHashValue]; ok {
 			if s.tracing(addr) {
 				fmt.Printf("[TRACE-S] ReadAccountCode %s -> codeMap len=%d\n", addr.Hex(), len(code))
@@ -1309,7 +1309,7 @@ func (s *witnessStateless) ReadAccountCodeSize(address accounts.Address) (int, e
 	if err != nil {
 		return 0, err
 	}
-	addr := address.Value()
+	addr := address
 	if s.tracing(addr) {
 		fmt.Printf("[TRACE-S] ReadAccountCodeSize %s -> %d\n", addr.Hex(), len(code))
 	}
@@ -1317,7 +1317,7 @@ func (s *witnessStateless) ReadAccountCodeSize(address accounts.Address) (int, e
 }
 
 func (s *witnessStateless) ReadAccountIncarnation(address accounts.Address) (uint64, error) {
-	addr := address.Value()
+	addr := address
 	if s.tracing(addr) {
 		fmt.Printf("[TRACE-S] ReadAccountIncarnation %s -> 0\n", addr.Hex())
 	}
@@ -1325,7 +1325,7 @@ func (s *witnessStateless) ReadAccountIncarnation(address accounts.Address) (uin
 }
 
 func (s *witnessStateless) HasStorage(address accounts.Address) (bool, error) {
-	addr := address.Value()
+	addr := address
 	addrHash, err := common.HashData(addr[:])
 	if err != nil {
 		return false, err
@@ -1368,7 +1368,7 @@ func (s *witnessStateless) HasStorage(address accounts.Address) (bool, error) {
 // StateWriter interface implementation
 
 func (s *witnessStateless) UpdateAccountData(address accounts.Address, original, account *accounts.Account) error {
-	addr := address.Value()
+	addr := address
 	// Make a copy to avoid the account being modified later
 	if account != nil {
 		accCopy := new(accounts.Account)
@@ -1387,7 +1387,7 @@ func (s *witnessStateless) UpdateAccountData(address accounts.Address, original,
 }
 
 func (s *witnessStateless) DeleteAccount(address accounts.Address, original *accounts.Account) error {
-	addr := address.Value()
+	addr := address
 	addrHash, err := common.HashData(addr[:])
 	if err != nil {
 		return err
@@ -1411,10 +1411,10 @@ func (s *witnessStateless) DeleteAccount(address accounts.Address, original *acc
 }
 
 func (s *witnessStateless) UpdateAccountCode(address accounts.Address, incarnation uint64, codeHash accounts.CodeHash, code []byte) error {
-	s.codeUpdates[codeHash.Value()] = code
+	s.codeUpdates[codeHash] = code
 	// Keep accountUpdates CodeHash in sync so ReadAccountData returns a
 	// consistent CodeHash even before UpdateAccountData is called.
-	addr := address.Value()
+	addr := address
 	if acc, ok := s.accountUpdates[addr]; ok && acc != nil {
 		acc.CodeHash = codeHash
 	}
@@ -1425,8 +1425,8 @@ func (s *witnessStateless) UpdateAccountCode(address accounts.Address, incarnati
 }
 
 func (s *witnessStateless) WriteAccountStorage(address accounts.Address, incarnation uint64, key accounts.StorageKey, original, value uint256.Int) error {
-	addr := address.Value()
-	keyValue := key.Value()
+	addr := address
+	keyValue := key
 
 	if value.IsZero() {
 		// Delete: add to storageDeletes, remove from storageWrites
@@ -1465,7 +1465,7 @@ func (s *witnessStateless) WriteAccountStorage(address accounts.Address, incarna
 }
 
 func (s *witnessStateless) CreateContract(address accounts.Address) error {
-	addr := address.Value()
+	addr := address
 	s.created[addr] = struct{}{}
 	delete(s.deleted, addr)
 	if s.tracing(addr) {
@@ -1505,7 +1505,7 @@ func (s *witnessStateless) Finalize() (common.Hash, error) {
 			continue
 		}
 		addrHash, _ := common.HashData(addr[:])
-		codeHashValue := account.CodeHash.Value()
+		codeHashValue := account.CodeHash
 		if code, ok := s.codeUpdates[codeHashValue]; ok {
 			// fmt.Printf("  UpdateAccountCode %x: codeHash=%x, len=%d\n", addr[:8], codeHashValue[:8], len(code))
 			if err := s.t.UpdateAccountCode(addrHash[:], code); err != nil {

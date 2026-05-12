@@ -319,7 +319,7 @@ func (oracle *Oracle) getBlockPricesFromBackend(ctx context.Context, backend Ora
 			break
 		}
 		sender, _ := item.tx.GetSender()
-		if sender.Value() != coinbase {
+		if sender != coinbase {
 			tipCopy := new(uint256.Int).Set(&item.tip)
 			*out = append(*out, tipCopy)
 			count++

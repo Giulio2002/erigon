@@ -26,7 +26,6 @@ import (
 	"github.com/holiman/uint256"
 	"github.com/tidwall/btree"
 
-	"github.com/erigontech/erigon/common"
 	"github.com/erigontech/erigon/common/crypto"
 	"github.com/erigontech/erigon/common/dbg"
 	"github.com/erigontech/erigon/common/log/v3"
@@ -137,16 +136,15 @@ func (rs *StateV3) applyVersionedWrites(roTx kv.TemporalTx, blockNum, txNum uint
 			addrs = append(addrs, addr)
 		}
 		slices.SortFunc(addrs, func(a, b accounts.Address) int {
-			av, bv := a.Value(), b.Value()
-			return bytes.Compare(av[:], bv[:])
+			return bytes.Compare(a[:], b[:])
 		})
 
 		for _, addr := range addrs {
 			d := perAddr[addr]
-			address := addr.Value()
+			address := addr
 
 			if d.selfDestruct {
-				if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr.Handle())) {
+				if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr)) {
 					fmt.Printf("%d apply:del code+storage: %x\n", blockNum, addr)
 				}
 				if err := domains.DomainDel(kv.CodeDomain, roTx, address[:], txNum, nil); err != nil {
@@ -157,7 +155,7 @@ func (rs *StateV3) applyVersionedWrites(roTx kv.TemporalTx, blockNum, txNum uint
 				}
 				// Pure delete: no account fields means DeleteAccount was called.
 				if d.balance == nil && d.nonce == nil && d.incarnation == nil && d.codeHash == nil {
-					if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr.Handle())) {
+					if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr)) {
 						fmt.Printf("%d apply:del account: %x\n", blockNum, addr)
 					}
 					if err := domains.DomainDel(kv.AccountsDomain, roTx, address[:], txNum, nil); err != nil {
@@ -209,7 +207,7 @@ func (rs *StateV3) applyVersionedWrites(roTx kv.TemporalTx, blockNum, txNum uint
 				} else if d.code != nil {
 					acc.CodeHash = accounts.InternCodeHash(crypto.Keccak256Hash(d.code))
 				}
-				if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr.Handle())) {
+				if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr)) {
 					fmt.Printf("%d apply:put account: %x balance:%d,nonce:%d,codehash:%x\n", blockNum, addr, &acc.Balance, acc.Nonce, acc.CodeHash)
 				}
 				enc := accounts.SerialiseV3(&acc)
@@ -226,7 +224,7 @@ func (rs *StateV3) applyVersionedWrites(roTx kv.TemporalTx, blockNum, txNum uint
 			}
 
 			if d.code != nil {
-				if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr.Handle())) {
+				if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr)) {
 					code := d.code
 					if len(code) > 40 {
 						code = code[:40]
@@ -246,11 +244,11 @@ func (rs *StateV3) applyVersionedWrites(roTx kv.TemporalTx, blockNum, txNum uint
 			}
 
 			for _, item := range d.storage {
-				key := item.key.Value()
+				key := item.key
 				composite := append(address[:], key[:]...)
 				v := item.value.Bytes()
 				if len(v) == 0 {
-					if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr.Handle())) {
+					if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr)) {
 						fmt.Printf("%d apply:del storage: %x %x\n", blockNum, addr, item.key)
 					}
 					if blockCache != nil {
@@ -264,7 +262,7 @@ func (rs *StateV3) applyVersionedWrites(roTx kv.TemporalTx, blockNum, txNum uint
 						}
 					}
 				} else {
-					if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr.Handle())) {
+					if dbg.TraceApply && (rs.trace || dbg.TraceAccount(addr)) {
 						fmt.Printf("%d apply:put storage: %x %x %x\n", blockNum, addr, item.key, &item.value)
 					}
 					if blockCache != nil {
@@ -285,7 +283,7 @@ func (rs *StateV3) applyVersionedWrites(roTx kv.TemporalTx, blockNum, txNum uint
 	var acc accounts.Account
 	emptyRemoval := rules.IsSpuriousDragon
 	for addr, increase := range balanceIncreases {
-		addrValue := addr.Value()
+		addrValue := addr
 		// Read current account — from blockCache if available, otherwise domain.
 		var enc0 []byte
 		if blockCache != nil {
@@ -427,14 +425,14 @@ func (rs *StateV3) SetSkipStepBoundaryCommitment(skip bool) {
 func (rs *StateV3) applyLogsAndTraces4(tx kv.TemporalTx, txNum uint64, receipt *types.Receipt, cummulativeBlobGas uint64, logs []*types.Log, traceFroms map[accounts.Address]struct{}, traceTos map[accounts.Address]struct{}, historyExecution bool, skipReceiptCache bool) error {
 	domains := rs.domains
 	for addr := range traceFroms {
-		addrValue := addr.Value()
+		addrValue := addr
 		if err := domains.IndexAdd(kv.TracesFromIdx, addrValue[:], txNum); err != nil {
 			return err
 		}
 	}
 
 	for addr := range traceTos {
-		addrValue := addr.Value()
+		addrValue := addr
 		if err := domains.IndexAdd(kv.TracesToIdx, addrValue[:], txNum); err != nil {
 			return err
 		}
@@ -812,14 +810,14 @@ func NotifyAccumulator(accumulator *shards.Accumulator, writes VersionedWrites) 
 			if p := pending[w.Address]; p != nil && p.incarnation != nil {
 				inc = *p.incarnation
 			}
-			accumulator.ChangeCode(w.Address.Value(), inc, code)
+			accumulator.ChangeCode(w.Address, inc, code)
 		case StoragePath:
 			val := w.Val.(uint256.Int)
 			var inc uint64
 			if p := pending[w.Address]; p != nil && p.incarnation != nil {
 				inc = *p.incarnation
 			}
-			accumulator.ChangeStorage(w.Address.Value(), inc, w.Key.Value(), val.Bytes())
+			accumulator.ChangeStorage(w.Address, inc, w.Key, val.Bytes())
 		}
 	}
 
@@ -842,7 +840,7 @@ func NotifyAccumulator(accumulator *shards.Accumulator, writes VersionedWrites) 
 			acc.CodeHash = *p.codeHash
 		}
 		serialised := accounts.SerialiseV3(&acc)
-		accumulator.ChangeAccount(addr.Value(), acc.Incarnation, serialised)
+		accumulator.ChangeAccount(addr, acc.Incarnation, serialised)
 	}
 }
 
@@ -874,7 +872,7 @@ func (w *Writer) UpdateAccountData(address accounts.Address, original, account *
 	if w.trace {
 		fmt.Printf("Writer: acc %x: {Balance: %d, Nonce: %d, Inc: %d, CodeHash: %x}\n", address, &account.Balance, account.Nonce, account.Incarnation, account.CodeHash)
 	}
-	addressValue := address.Value()
+	addressValue := address
 	if original.Incarnation > account.Incarnation {
 		//del, before create: to clanup code/storage
 		if err := w.tx.DomainDel(kv.CodeDomain, addressValue[:], w.txNum, nil); err != nil {
@@ -899,7 +897,7 @@ func (w *Writer) UpdateAccountCode(address accounts.Address, incarnation uint64,
 	if w.trace {
 		fmt.Printf("code: %x, %x, valLen: %d\n", address, codeHash, len(code))
 	}
-	addressValue := address.Value()
+	addressValue := address
 	if err := w.tx.DomainPut(kv.CodeDomain, addressValue[:], code, w.txNum, nil); err != nil {
 		return err
 	}
@@ -920,7 +918,7 @@ func (w *Writer) DeleteAccount(address accounts.Address, original *accounts.Acco
 	//if err := w.tx.DomainDel(kv.CodeDomain, address[:], nil); err != nil {
 	//	return err
 	//}
-	addressValue := address.Value()
+	addressValue := address
 	if err := w.tx.DomainDel(kv.AccountsDomain, addressValue[:], w.txNum, nil); err != nil {
 		return err
 	}
@@ -934,14 +932,8 @@ func (w *Writer) WriteAccountStorage(address accounts.Address, incarnation uint6
 	if original == value {
 		return nil
 	}
-	var addressValue common.Address
-	if !address.IsNil() {
-		addressValue = address.Value()
-	}
-	var keyValue common.Hash
-	if !key.IsNil() {
-		keyValue = key.Value()
-	}
+	addressValue := address
+	keyValue := key
 	composite := append(addressValue[:], keyValue[:]...)
 	v := value.Bytes()
 	if w.trace {
@@ -966,7 +958,7 @@ func (w *Writer) CreateContract(address accounts.Address) error {
 	if fastCreate {
 		return nil
 	}
-	addressValue := address.Value()
+	addressValue := address
 	if err := w.tx.DomainDelPrefix(kv.StorageDomain, addressValue[:], w.txNum); err != nil {
 		return err
 	}
@@ -1240,7 +1232,7 @@ func (c *BlockStateCache) Flush(domains *execctx.SharedDomains, roTx kv.Temporal
 
 	for i := range c.writeLog {
 		op := &c.writeLog[i]
-		addrVal := op.addr.Value()
+		addrVal := op.addr
 		switch op.kind {
 		case bcOpDeleteAccount:
 			// self-destruct / empty-removal: code + storage prefix delete.
@@ -1263,7 +1255,7 @@ func (c *BlockStateCache) Flush(domains *execctx.SharedDomains, roTx kv.Temporal
 				return err
 			}
 		case bcOpPutStorage:
-			keyVal := op.key.Value()
+			keyVal := op.key
 			composite := make([]byte, 20+32)
 			copy(composite, addrVal[:])
 			copy(composite[20:], keyVal[:])
@@ -1386,10 +1378,7 @@ func (r *CachedReaderV3) ReadAccountStorage(address accounts.Address, key accoun
 }
 
 func (r *ReaderV3) HasStorage(address accounts.Address) (bool, error) {
-	var value common.Address
-	if !address.IsNil() {
-		value = address.Value()
-	}
+	value := address
 	// this is an optimization, but also checks the account is checked in the domain
 	// for being deleted on unwind before we try to access the storage
 	if enc, _, err := r.getter.GetLatest(kv.AccountsDomain, value[:]); len(enc) == 0 {
@@ -1405,10 +1394,7 @@ func (r *ReaderV3) ReadAccountData(address accounts.Address) (*accounts.Account,
 }
 
 func (r *ReaderV3) readAccountData(address accounts.Address) ([]byte, *accounts.Account, error) {
-	var value common.Address
-	if !address.IsNil() {
-		value = address.Value()
-	}
+	value := address
 	enc, _, err := r.getter.GetLatest(kv.AccountsDomain, value[:])
 	if err != nil {
 		return nil, nil, err
@@ -1436,14 +1422,8 @@ func (r *ReaderV3) ReadAccountDataForDebug(address accounts.Address) (*accounts.
 
 func (r *ReaderV3) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
 	var composite [20 + 32]byte
-	var addressValue common.Address
-	if !address.IsNil() {
-		addressValue = address.Value()
-	}
-	var keyValue common.Hash
-	if !key.IsNil() {
-		keyValue = key.Value()
-	}
+	addressValue := address
+	keyValue := key
 	copy(composite[0:20], addressValue[0:20])
 	copy(composite[20:], keyValue[:])
 	enc, _, err := r.getter.GetLatest(kv.StorageDomain, composite[:])
@@ -1469,10 +1449,7 @@ func (r *ReaderV3) ReadAccountStorage(address accounts.Address, key accounts.Sto
 }
 
 func (r *ReaderV3) ReadAccountCode(address accounts.Address) ([]byte, error) {
-	var addressValue common.Address
-	if !address.IsNil() {
-		addressValue = address.Value()
-	}
+	addressValue := address
 	enc, _, err := r.getter.GetLatest(kv.CodeDomain, addressValue[:])
 	if err != nil {
 		return nil, err
@@ -1485,10 +1462,7 @@ func (r *ReaderV3) ReadAccountCode(address accounts.Address) ([]byte, error) {
 }
 
 func (r *ReaderV3) ReadAccountCodeSize(address accounts.Address) (int, error) {
-	var addressValue common.Address
-	if !address.IsNil() {
-		addressValue = address.Value()
-	}
+	addressValue := address
 	enc, _, err := r.getter.GetLatest(kv.CodeDomain, addressValue[:])
 	if err != nil {
 		return 0, err

@@ -225,7 +225,7 @@ func (ch selfdestructChange) revert(s *IntraBlockState) error {
 		return err
 	}
 	if obj != nil {
-		trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account.Handle()))
+		trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account))
 		var tracePrefix string
 		if trace {
 			tracePrefix = fmt.Sprintf("%d (%d.%d)", s.blockNum, s.txIndex, s.version)
@@ -292,7 +292,7 @@ func (ch balanceChange) revert(s *IntraBlockState) error {
 		return err
 	}
 
-	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account.Handle()))
+	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account))
 	var tracePrefix string
 	if trace {
 		tracePrefix = fmt.Sprintf("%d (%d.%d)", s.blockNum, s.txIndex, s.version)
@@ -355,7 +355,7 @@ func (ch nonceChange) revert(s *IntraBlockState) error {
 		return err
 	}
 
-	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account.Handle()))
+	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account))
 	var tracePrefix string
 	if trace {
 		tracePrefix = fmt.Sprintf("%d (%d.%d)", s.blockNum, s.txIndex, s.version)
@@ -393,7 +393,7 @@ func (ch codeChange) revert(s *IntraBlockState) error {
 		return err
 	}
 
-	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account.Handle()))
+	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account))
 	var tracePrefix string
 	if trace {
 		tracePrefix = fmt.Sprintf("%d (%d.%d)", s.blockNum, s.txIndex, s.version)
@@ -451,7 +451,7 @@ func (ch storageChange) revert(s *IntraBlockState) error {
 		return err
 	}
 
-	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account.Handle()))
+	trace := dbg.TraceTransactionIO && (s.trace || dbg.TraceAccount(ch.account))
 	var tracePrefix string
 	if trace {
 		tracePrefix = fmt.Sprintf("%d (%d.%d)", s.blockNum, s.txIndex, s.version)

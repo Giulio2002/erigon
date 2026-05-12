@@ -65,7 +65,7 @@ func TestLightCollectorNoncePreservation(t *testing.T) {
 		Nonce:   5,
 		Balance: *uint256.NewInt(1000),
 	}
-	addrVal := addr.Value()
+	addrVal := addr
 	err := domains.DomainPut(kv.AccountsDomain, tx, addrVal[:],
 		accounts.SerialiseV3(&seedAccount), 0, nil)
 	require.NoError(t, err)
@@ -131,7 +131,7 @@ func TestLightCollectorNoncePreservationCrossBlock(t *testing.T) {
 	rs := state.NewStateV3Buffered(state.NewStateV3(domains, ethconfig.Sync{}, lgr))
 
 	addr := accounts.InternAddress(common.HexToAddress("0xDEAD"))
-	addrVal := addr.Value()
+	addrVal := addr
 
 	// Seed: nonce=10, balance=5000
 	seedAccount := accounts.Account{Nonce: 10, Balance: *uint256.NewInt(5000)}
@@ -194,7 +194,7 @@ func TestLightCollectorNewAccountCodeHash(t *testing.T) {
 	rs := state.NewStateV3Buffered(state.NewStateV3(domains, ethconfig.Sync{}, lgr))
 
 	addr := accounts.InternAddress(common.HexToAddress("0xNEW1"))
-	addrVal := addr.Value()
+	addrVal := addr
 
 	// Do NOT seed the domain — addr is a brand-new account.
 
@@ -254,7 +254,7 @@ func TestLightCollectorStorageReentrancyGuard(t *testing.T) {
 	rs := state.NewStateV3Buffered(state.NewStateV3(domains, ethconfig.Sync{}, lgr))
 
 	contract := accounts.InternAddress(common.HexToAddress("0xC0NTRACT"))
-	contractVal := contract.Value()
+	contractVal := contract
 	slotKey := accounts.InternKey(common.HexToHash("0xcb")) // reentrancy guard slot
 
 	// Seed: contract exists with storage slot cb = 1
@@ -263,7 +263,7 @@ func TestLightCollectorStorageReentrancyGuard(t *testing.T) {
 		accounts.SerialiseV3(&seedAccount), 0, nil)
 	require.NoError(t, err)
 
-	slotHash := slotKey.Value()
+	slotHash := slotKey
 	composite := append(contractVal[:], slotHash[:]...)
 	one := uint256.NewInt(1)
 	err = domains.DomainPut(kv.StorageDomain, tx, composite, one.Bytes(), 0, nil)
@@ -333,7 +333,7 @@ func TestLightCollectorStorageUnchangedSlot(t *testing.T) {
 	rs := state.NewStateV3Buffered(state.NewStateV3(domains, ethconfig.Sync{}, lgr))
 
 	contract := accounts.InternAddress(common.HexToAddress("0xC0NTRACT2"))
-	contractVal := contract.Value()
+	contractVal := contract
 	slotKey := accounts.InternKey(common.HexToHash("0xcb"))
 
 	// Seed: slot cb = 1
@@ -342,7 +342,7 @@ func TestLightCollectorStorageUnchangedSlot(t *testing.T) {
 		accounts.SerialiseV3(&seedAccount), 0, nil)
 	require.NoError(t, err)
 
-	slotHash := slotKey.Value()
+	slotHash := slotKey
 	composite := append(contractVal[:], slotHash[:]...)
 	one := uint256.NewInt(1)
 	err = domains.DomainPut(kv.StorageDomain, tx, composite, one.Bytes(), 0, nil)
@@ -366,7 +366,7 @@ func TestLightCollectorStorageUnchangedSlot(t *testing.T) {
 
 	// Now verify a DIFFERENT slot on the same contract is unaffected
 	slotKey2 := accounts.InternKey(common.HexToHash("0xfe"))
-	slotHash2 := slotKey2.Value()
+	slotHash2 := slotKey2
 	composite2 := append(contractVal[:], slotHash2[:]...)
 	thirtySeven := uint256.NewInt(37)
 	err = domains.DomainPut(kv.StorageDomain, tx, composite2, thirtySeven.Bytes(), 0, nil)

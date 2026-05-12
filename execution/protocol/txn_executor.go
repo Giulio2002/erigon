@@ -178,7 +178,7 @@ func ApplyFrame(evm *vm.EVM, msg Message, gp *GasPool) (*evmtypes.ExecutionResul
 
 // to returns the recipient of the message.
 func (st *TxnExecutor) to() accounts.Address {
-	if st.msg == nil || st.msg.To().IsNil() /* contract creation */ {
+	if st.msg == nil || st.msg.To() == accounts.NilAddress {
 		return accounts.ZeroAddress
 	}
 	return st.msg.To()
@@ -294,7 +294,7 @@ func (st *TxnExecutor) preCheck(gasBailout bool, intrinsicGasResult mdgas.Intrin
 		if err != nil {
 			return fmt.Errorf("%w: %w", ErrTxnExecutionFailed, err)
 		}
-		if !codeHash.IsEmpty() {
+		if codeHash != accounts.EmptyCodeHash && codeHash != (common.Hash{}) {
 			// common.Hash{} means that the sender is not in the state.
 			// Historically there were transactions with 0 gas price and non-existing sender,
 			// so we have to allow that.
@@ -369,7 +369,7 @@ func (st *TxnExecutor) ApplyFrame() (*evmtypes.ExecutionResult, error) {
 
 	msg := st.msg
 	sender := msg.From()
-	contractCreation := msg.To().IsNil()
+	contractCreation := msg.To() == accounts.NilAddress
 	rules := st.evm.ChainRules()
 	vmConfig := st.evm.Config()
 	isEIP3860 := vmConfig.HasEip3860(rules)
@@ -503,7 +503,7 @@ func (st *TxnExecutor) Execute(refunds bool, gasBailout bool) (result *evmtypes.
 
 	msg := st.msg
 	sender := msg.From()
-	contractCreation := msg.To().IsNil()
+	contractCreation := msg.To() == accounts.NilAddress
 	accessTuples := slices.Clone[types.AccessList](msg.AccessList())
 	auths := msg.Authorizations()
 
@@ -681,7 +681,7 @@ func (st *TxnExecutor) Execute(refunds bool, gasBailout bool) (result *evmtypes.
 
 	if !msg.IsFree() && rules.IsLondon {
 		burntContractAddress = st.evm.ChainConfig().GetBurntContract(st.evm.Context.BlockNumber)
-		if !burntContractAddress.IsNil() {
+		if burntContractAddress != accounts.NilAddress {
 			burnAmount = u256.Mul(u256.U64(st.txnGasUsed), st.evm.Context.BaseFee)
 
 			if rules.IsAura && rules.IsPrague {
@@ -695,7 +695,7 @@ func (st *TxnExecutor) Execute(refunds bool, gasBailout bool) (result *evmtypes.
 		}
 	}
 
-	if dbg.TraceGas || st.state.Trace() || dbg.TraceAccount(st.msg.From().Handle()) {
+	if dbg.TraceGas || st.state.Trace() || dbg.TraceAccount(st.msg.From()) {
 		fmt.Printf("%d (%d.%d) Fees %x: tipped: %d, burnt: %d, price: %d, gas: %d\n", st.state.BlockNumber(), st.state.TxIndex(), st.state.Incarnation(), st.msg.From(), &tipAmount, &burnAmount, st.gasPrice, st.txnGasUsed)
 	}
 
@@ -770,7 +770,7 @@ func (st *TxnExecutor) verifyAuthorities(auths []types.Authorization, contractCr
 			if err != nil {
 				return nil, stateIgasRefund, fmt.Errorf("%w: %w", ErrTxnExecutionFailed, err)
 			}
-			if !codeHash.IsEmpty() {
+			if codeHash != accounts.EmptyCodeHash && codeHash != (common.Hash{}) {
 				// check for delegation
 				_, ok, err := st.state.GetDelegatedDesignation(authority)
 				if err != nil {
@@ -830,7 +830,7 @@ func (st *TxnExecutor) verifyAuthorities(auths []types.Authorization, contractCr
 func (st *TxnExecutor) refundGas() {
 	// Return ETH for remaining gas, exchanged at the original rate.
 	remaining := u256.Mul(u256.U64(st.initialGas.Total()-st.txnGasUsed), *st.gasPrice)
-	if dbg.TraceGas || st.state.Trace() || dbg.TraceAccount(st.msg.From().Handle()) {
+	if dbg.TraceGas || st.state.Trace() || dbg.TraceAccount(st.msg.From()) {
 		fmt.Printf("%d (%d.%d) Refund %x: remaining: %d, price: %d val: %d\n", st.state.BlockNumber(), st.state.TxIndex(), st.state.Incarnation(), st.msg.From(), st.gasRemaining, st.gasPrice, &remaining)
 	}
 	st.state.AddBalance(st.msg.From(), remaining, tracing.BalanceIncreaseGasReturn)

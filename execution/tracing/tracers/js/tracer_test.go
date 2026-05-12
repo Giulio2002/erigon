@@ -63,7 +63,7 @@ func runTrace(tracer *tracers.Tracer, vmctx *vmContext, chaincfg *chain.Config, 
 		contract.Code = contractCode
 	}
 
-	tracer.OnTxStart(env.GetVMContext(), types.NewTransaction(0, accounts.ZeroAddress.Value(), nil, gasLimit, nil, nil), contract.Caller())
+	tracer.OnTxStart(env.GetVMContext(), types.NewTransaction(0, accounts.ZeroAddress, nil, gasLimit, nil, nil), contract.Caller())
 	tracer.OnEnter(0, byte(vm.CALL), contract.Caller(), contract.Address(), false, []byte{}, startGas.Total(), value, contractCode)
 	ret, endGas, err := env.Run(contract, startGas, []byte{}, false)
 	tracer.OnExit(0, ret, startGas.Total()-endGas.Total(), err, true)
@@ -182,7 +182,7 @@ func TestHaltBetweenSteps(t *testing.T) {
 	scope := &vm.CallContext{
 		Contract: *vm.NewContract(accounts.ZeroAddress, accounts.ZeroAddress, accounts.ZeroAddress, uint256.Int{}),
 	}
-	tracer.OnTxStart(env.GetVMContext(), types.NewTransaction(0, accounts.ZeroAddress.Value(), new(uint256.Int), 0, new(uint256.Int), nil), accounts.ZeroAddress)
+	tracer.OnTxStart(env.GetVMContext(), types.NewTransaction(0, accounts.ZeroAddress, new(uint256.Int), 0, new(uint256.Int), nil), accounts.ZeroAddress)
 	tracer.OnEnter(0, byte(vm.CALL), accounts.ZeroAddress, accounts.ZeroAddress, false, []byte{}, 0, uint256.Int{}, []byte{})
 	tracer.OnOpcode(0, 0, 0, 0, scope, nil, 0, nil)
 	timeout := errors.New("stahp")
@@ -204,7 +204,7 @@ func TestNoStepExec(t *testing.T) {
 			t.Fatal(err)
 		}
 		env := vm.NewEVM(evmtypes.BlockContext{BlockNumber: 1}, evmtypes.TxContext{GasPrice: *uint256.NewInt(100)}, state.New(state.NewNoopReader()), chain.AllProtocolChanges, vm.Config{Tracer: tracer.Hooks})
-		tracer.OnTxStart(env.GetVMContext(), types.NewTransaction(0, accounts.ZeroAddress.Value(), new(uint256.Int), 0, new(uint256.Int), nil), accounts.ZeroAddress)
+		tracer.OnTxStart(env.GetVMContext(), types.NewTransaction(0, accounts.ZeroAddress, new(uint256.Int), 0, new(uint256.Int), nil), accounts.ZeroAddress)
 		tracer.OnEnter(0, byte(vm.CALL), accounts.ZeroAddress, accounts.ZeroAddress, false, []byte{}, 1000, uint256.Int{}, []byte{})
 		tracer.OnExit(0, nil, 0, nil, false)
 		ret, err := tracer.GetResult()

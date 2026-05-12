@@ -77,7 +77,7 @@ func TestCaplinBlockProductionWithWithdrawalRequest(t *testing.T) {
 	calldata = append(calldata, make([]byte, 8)...) // amount=0 → full exit
 
 	baseFee := chainPack.TopBlock.BaseFee().Uint64()
-	withdrawalAddr := params.WithdrawalRequestAddress.Value()
+	withdrawalAddr := params.WithdrawalRequestAddress
 	withdrawalTx, err := types.SignTx(
 		&types.LegacyTx{
 			CommonTx: types.CommonTx{

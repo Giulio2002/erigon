@@ -143,7 +143,7 @@ func (t *ValidationRulesTracer) OnOpcode(pc uint64, op byte, gas, cost uint64, s
 	if opCode == vm.CALL || opCode == vm.CALLCODE || opCode == vm.DELEGATECALL || opCode == vm.STATICCALL {
 		if len(scope.StackData()) > 0 {
 			addr := common.BytesToAddress(scope.StackData()[0].Bytes())
-			senderValue := t.senderAddress.Value()
+			senderValue := t.senderAddress
 			if t.isDelegatedAccount(scope.Code()) && addr != senderValue {
 				t.err = fmt.Errorf("access to delegated account %s not allowed", addr.Hex())
 				return
@@ -193,8 +193,8 @@ func (t *ValidationRulesTracer) OnFault(pc uint64, op byte, gas, cost uint64, sc
 }
 
 func (t *ValidationRulesTracer) isAssociatedStorage(slot accounts.StorageKey, addr accounts.Address) bool {
-	slotValue := slot.Value()
-	addrValue := addr.Value()
+	slotValue := slot
+	addrValue := addr
 
 	// Case 1: The slot value is the address
 	if bytes.Equal(slotValue[:], addrValue[:]) {

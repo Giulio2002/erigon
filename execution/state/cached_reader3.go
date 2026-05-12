@@ -42,8 +42,7 @@ func (r *CachedReader3) TracePrefix() string       { return "" }
 
 // ReadAccountData is called when an account needs to be fetched from the state
 func (r *CachedReader3) ReadAccountData(address accounts.Address) (*accounts.Account, error) {
-	addressValue := address.Value()
-	enc, err := r.cache.Get(addressValue[:])
+	enc, err := r.cache.Get(address[:])
 	if err != nil {
 		return nil, err
 	}
@@ -64,9 +63,7 @@ func (r *CachedReader3) ReadAccountDataForDebug(address accounts.Address) (*acco
 }
 
 func (r *CachedReader3) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addressValue := address.Value()
-	keyValue := key.Value()
-	compositeKey := append(addressValue[:], keyValue[:]...)
+	compositeKey := append(address[:], key[:]...)
 	enc, err := r.cache.Get(compositeKey)
 	if err != nil {
 		return uint256.Int{}, false, err
@@ -80,12 +77,11 @@ func (r *CachedReader3) ReadAccountStorage(address accounts.Address, key account
 }
 
 func (r *CachedReader3) HasStorage(address accounts.Address) (bool, error) {
-	return r.cache.HasStorage(address.Value())
+	return r.cache.HasStorage(address)
 }
 
 func (r *CachedReader3) ReadAccountCode(address accounts.Address) ([]byte, error) {
-	addressValue := address.Value()
-	code, err := r.cache.GetCode(addressValue[:])
+	code, err := r.cache.GetCode(address[:])
 	if err != nil {
 		return nil, err
 	}

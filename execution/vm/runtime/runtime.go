@@ -87,7 +87,7 @@ func setDefaults(cfg *Config) {
 		}
 	}
 
-	if cfg.Origin.IsNil() {
+	if cfg.Origin == accounts.NilAddress {
 		cfg.Origin = accounts.ZeroAddress
 	}
 	if cfg.Difficulty == nil {
@@ -212,7 +212,7 @@ func Create(input []byte, cfg *Config, blockNr uint64) ([]byte, common.Address, 
 		nil,
 		false,
 	)
-	return code, address.Value(), leftOverGas, err
+	return code, address, leftOverGas, err
 }
 
 // Call executes the code given by the contract's address. It will return the

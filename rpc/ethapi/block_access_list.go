@@ -64,7 +64,7 @@ func MarshalBlockAccessList(bal types.BlockAccessList) []*RPCAccountAccess {
 	result := make([]*RPCAccountAccess, len(bal))
 	for i, ac := range bal {
 		entry := &RPCAccountAccess{
-			Address:        ac.Address.Value(),
+			Address:        ac.Address,
 			StorageChanges: make([]*RPCSlotChanges, len(ac.StorageChanges)),
 			StorageReads:   make([]common.Hash, len(ac.StorageReads)),
 			BalanceChanges: make([]*RPCBalanceChange, len(ac.BalanceChanges)),
@@ -73,7 +73,7 @@ func MarshalBlockAccessList(bal types.BlockAccessList) []*RPCAccountAccess {
 		}
 		for j, sc := range ac.StorageChanges {
 			slot := &RPCSlotChanges{
-				Key:     sc.Slot.Value(),
+				Key:     sc.Slot,
 				Changes: make([]*RPCStorageChange, len(sc.Changes)),
 			}
 			for k, ch := range sc.Changes {
@@ -84,9 +84,7 @@ func MarshalBlockAccessList(bal types.BlockAccessList) []*RPCAccountAccess {
 			}
 			entry.StorageChanges[j] = slot
 		}
-		for j, sr := range ac.StorageReads {
-			entry.StorageReads[j] = sr.Value()
-		}
+		copy(entry.StorageReads, ac.StorageReads)
 		for j, bc := range ac.BalanceChanges {
 			v := bc.Value.ToBig()
 			entry.BalanceChanges[j] = &RPCBalanceChange{

@@ -42,15 +42,15 @@ func NewEVMBlockContext(header *types.Header, blockHashFunc func(n uint64) (comm
 	engine rules.EngineReader, author accounts.Address, config *chain.Config) evmtypes.BlockContext {
 	// If we don't have an explicit author (i.e. not mining), extract from the header
 	var beneficiary accounts.Address
-	if author.IsNil() {
+	if author == accounts.NilAddress {
 		if config.Bor != nil && config.Bor.IsRio(header.Number.Uint64()) {
 			beneficiary = config.Bor.CalculateCoinbase(header.Number.Uint64())
 
 			// In case the coinbase is not set post Rio, use the default coinbase
-			if beneficiary.IsNil() {
+			if beneficiary == accounts.NilAddress && engine != nil {
 				beneficiary, _ = engine.Author(header)
 			}
-		} else {
+		} else if engine != nil {
 			beneficiary, _ = engine.Author(header) // Ignore error, we're past header validation
 		}
 	} else {
@@ -209,7 +209,7 @@ func GetHashFn(ref *types.Header, getHeader func(hash common.Hash, number uint64
 func CanTransfer(db evmtypes.IntraBlockState, addr accounts.Address, amount uint256.Int) (can bool, err error) {
 	balance, err := db.GetBalance(addr)
 
-	if dbg.TraceTransactionIO && db.Trace() || dbg.TraceAccount(addr.Handle()) {
+	if dbg.TraceTransactionIO && db.Trace() || dbg.TraceAccount(addr) {
 		balance := balance // avoid capture allocation unless we're tracing
 		defer func() {
 			if !can {

@@ -169,7 +169,7 @@ func (bra *BlockReadAheader) warmBody(ctx context.Context, db kv.RoDB, header *t
 					acctChanges := bal[idx]
 					acct, _ := stateReader.ReadAccountData(acctChanges.Address)
 					// Warm code if account has code or if there are code changes
-					if (acct != nil && !acct.CodeHash.IsEmpty()) || len(acctChanges.CodeChanges) > 0 {
+					if (acct != nil && acct.CodeHash != accounts.EmptyCodeHash && acct.CodeHash != (common.Hash{})) || len(acctChanges.CodeChanges) > 0 {
 						stateReader.ReadAccountCode(acctChanges.Address)
 					}
 					for _, slotChanges := range acctChanges.StorageChanges {
@@ -235,7 +235,7 @@ func (bra *BlockReadAheader) warmBody(ctx context.Context, db kv.RoDB, header *t
 				// Warm To account and its code if it has one
 				if toAddr := txn.GetTo(); toAddr != nil {
 					to := accounts.InternAddress(*toAddr)
-					if acct, _ := stateReader.ReadAccountData(to); acct != nil && !acct.CodeHash.IsEmpty() {
+					if acct, _ := stateReader.ReadAccountData(to); acct != nil && acct.CodeHash != accounts.EmptyCodeHash && acct.CodeHash != (common.Hash{}) {
 						stateReader.ReadAccountCode(to)
 					}
 				}
@@ -243,7 +243,7 @@ func (bra *BlockReadAheader) warmBody(ctx context.Context, db kv.RoDB, header *t
 				// Warm transaction access list accounts and their code
 				for _, entry := range txn.GetAccessList() {
 					addr := accounts.InternAddress(entry.Address)
-					if acct, _ := stateReader.ReadAccountData(addr); acct != nil && !acct.CodeHash.IsEmpty() {
+					if acct, _ := stateReader.ReadAccountData(addr); acct != nil && acct.CodeHash != accounts.EmptyCodeHash && acct.CodeHash != (common.Hash{}) {
 						stateReader.ReadAccountCode(addr)
 					}
 					for _, slot := range entry.StorageKeys {

@@ -396,7 +396,7 @@ func (ot *OeTracer) captureStartOrEnter(deep bool, typ vm.OpCode, from accounts.
 		trResult := &CreateTraceResult{}
 		trace.Type = CREATE
 		trResult.Address = new(common.Address)
-		toVal := to.Value()
+		toVal := to
 		copy(trResult.Address[:], toVal[:])
 		trace.Result = trResult
 	} else {
@@ -424,7 +424,7 @@ func (ot *OeTracer) captureStartOrEnter(deep bool, typ vm.OpCode, from accounts.
 	copy(trace.TraceAddress, ot.traceAddr)
 	if create {
 		action := CreateTraceAction{}
-		action.From = from.Value()
+		action.From = from
 		action.CreationMethod = strings.ToLower(typ.String())
 		action.Gas.ToInt().SetUint64(gas)
 		action.Init = common.Copy(input)
@@ -434,8 +434,8 @@ func (ot *OeTracer) captureStartOrEnter(deep bool, typ vm.OpCode, from accounts.
 		trace.Type = SUICIDE
 		trace.Result = nil
 		action := &SuicideTraceAction{}
-		action.Address = from.Value()
-		action.RefundAddress = to.Value()
+		action.Address = from
+		action.RefundAddress = to
 		action.Balance.ToInt().Set(value.ToBig())
 		trace.Action = action
 	} else {
@@ -450,8 +450,8 @@ func (ot *OeTracer) captureStartOrEnter(deep bool, typ vm.OpCode, from accounts.
 		case vm.STATICCALL:
 			action.CallType = STATICCALL
 		}
-		action.From = from.Value()
-		action.To = to.Value()
+		action.From = from
+		action.To = to
 		action.Gas.ToInt().SetUint64(gas)
 		action.Input = common.Copy(input)
 		action.Value.ToInt().Set(value.ToBig())
@@ -725,7 +725,7 @@ func (sd *StateDiff) WriteAccountStorage(address accounts.Address, incarnation u
 	}
 	m := make(map[string]any)
 	m["*"] = &StateDiffStorage{From: common.BytesToHash(original.Bytes()), To: common.BytesToHash(value.Bytes())}
-	accountDiff.Storage[key.Value()] = m
+	accountDiff.Storage[key] = m
 	return nil
 }
 

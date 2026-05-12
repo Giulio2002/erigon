@@ -388,12 +388,12 @@ func TestSelfDestructRecordsStorageDeletes(t *testing.T) {
 	writes := ibs.VersionedWrites(false)
 	t.Logf("VersionedWrites count: %d", len(writes))
 	for _, w := range writes {
-		t.Logf("  write: addr=%x path=%d key=%x val=%v", w.Address.Value(), w.Path, w.Key.Value(), w.Val)
+		t.Logf("  write: addr=%x path=%d key=%x val=%v", w.Address, w.Path, w.Key, w.Val)
 	}
 	vm.FlushVersionedWrites(writes, true, "")
 
 	// Check versionMap has storage DELETE entries (value = zero)
-	t.Logf("Reading slot0=%x slot1=%x", slot0.Value(), slot1.Value())
+	t.Logf("Reading slot0=%x slot1=%x", slot0, slot1)
 	rr0 := vm.Read(addr, StoragePath, slot0, 1)
 	t.Logf("slot0 read: status=%d value=%v", rr0.Status(), rr0.Value())
 	assert.Equal(t, MVReadResultDone, rr0.Status(), "slot0 should have versionMap entry")

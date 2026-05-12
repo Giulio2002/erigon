@@ -190,8 +190,7 @@ func StateHistoryStartTxNum(ttx kv.TemporalTx) uint64 {
 func (hr *HistoryReaderV3) DiscardReadList() {}
 
 func (hr *HistoryReaderV3) ReadAccountData(address accounts.Address) (*accounts.Account, error) {
-	addressValue := address.Value()
-	enc, ok, err := hr.getAsOf(kv.AccountsDomain, addressValue[:])
+	enc, ok, err := hr.getAsOf(kv.AccountsDomain, address[:])
 	if err != nil || !ok || len(enc) == 0 {
 		if hr.trace {
 			fmt.Printf("%sReadAccountData (hist)[%x] => []\n", hr.tracePrefix, address)
@@ -215,9 +214,7 @@ func (hr *HistoryReaderV3) ReadAccountDataForDebug(address accounts.Address) (*a
 }
 
 func (hr *HistoryReaderV3) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addressValue := address.Value()
-	keyValue := key.Value()
-	hr.composite = append(append(hr.composite[:0], addressValue[:]...), keyValue[:]...)
+	hr.composite = append(append(hr.composite[:0], address[:]...), key[:]...)
 	enc, ok, err := hr.getAsOf(kv.StorageDomain, hr.composite)
 	if hr.trace {
 		fmt.Printf("%sReadAccountStorage (hist)[%x] [%x] => [%x]\n", hr.tracePrefix, address, key, enc)
@@ -230,13 +227,12 @@ func (hr *HistoryReaderV3) ReadAccountStorage(address accounts.Address, key acco
 }
 
 func (hr *HistoryReaderV3) HasStorage(address accounts.Address) (bool, error) {
-	addressValue := address.Value()
-	to, ok := kv.NextSubtree(addressValue[:])
+	to, ok := kv.NextSubtree(address[:])
 	if !ok {
 		to = nil
 	}
 
-	it, err := hr.ttx.RangeAsOf(kv.StorageDomain, addressValue[:], to, hr.txNum, order.Asc, kv.Unlim)
+	it, err := hr.ttx.RangeAsOf(kv.StorageDomain, address[:], to, hr.txNum, order.Asc, kv.Unlim)
 	if err != nil {
 		return false, err
 	}
@@ -263,8 +259,7 @@ func (hr *HistoryReaderV3) HasStorage(address accounts.Address) (bool, error) {
 func (hr *HistoryReaderV3) ReadAccountCode(address accounts.Address) ([]byte, error) {
 	//  must pass key2=Nil here: because Erigon4 does concatinate key1+key2 under the hood
 	//code, _, err := hr.ttx.GetAsOf(kv.CodeDomain, address.Bytes(), codeHash.Bytes(), hr.txNum)
-	addressValue := address.Value()
-	code, _, err := hr.getAsOf(kv.CodeDomain, addressValue[:])
+	code, _, err := hr.getAsOf(kv.CodeDomain, address[:])
 	if hr.trace {
 		lenc, cs := printCode(code)
 		fmt.Printf("%sReadAccountCode (hist)[%x] => [%d:%s]\n", hr.tracePrefix, address, lenc, cs)
@@ -273,14 +268,12 @@ func (hr *HistoryReaderV3) ReadAccountCode(address accounts.Address) ([]byte, er
 }
 
 func (hr *HistoryReaderV3) ReadAccountCodeSize(address accounts.Address) (int, error) {
-	addressValue := address.Value()
-	enc, _, err := hr.getAsOf(kv.CodeDomain, addressValue[:])
+	enc, _, err := hr.getAsOf(kv.CodeDomain, address[:])
 	return len(enc), err
 }
 
 func (hr *HistoryReaderV3) ReadAccountIncarnation(address accounts.Address) (uint64, error) {
-	addressValue := address.Value()
-	enc, ok, err := hr.getAsOf(kv.AccountsDomain, addressValue[:])
+	enc, ok, err := hr.getAsOf(kv.AccountsDomain, address[:])
 	if err != nil || !ok || len(enc) == 0 {
 		if hr.trace {
 			fmt.Printf("%sReadAccountIncarnation (hist)[%x] => [0]\n", hr.tracePrefix, address)

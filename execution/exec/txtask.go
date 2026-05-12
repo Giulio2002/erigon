@@ -191,12 +191,12 @@ func (r *TxResult) CreateReceipt(txIndex int, cumulativeGasUsed uint64, firstLog
 		return nil, err
 	}
 
-	if txMessage != nil && txMessage.To().IsNil() {
+	if txMessage != nil && txMessage.To() == accounts.NilAddress {
 		txSender, err := r.TxSender()
 		if err != nil {
 			return nil, err
 		}
-		receipt.ContractAddress = types.CreateAddress(txSender.Value(), r.Tx().GetNonce())
+		receipt.ContractAddress = types.CreateAddress(txSender, r.Tx().GetNonce())
 	}
 
 	return receipt, nil
@@ -279,7 +279,7 @@ func (t *TxTask) TxHash() common.Hash {
 }
 
 func (t *TxTask) TxSender() (accounts.Address, error) {
-	if !t.sender.IsNil() {
+	if t.sender != accounts.NilAddress {
 		return t.sender, nil
 	}
 	if t.TxIndex < 0 || t.TxIndex >= len(t.Txs) {

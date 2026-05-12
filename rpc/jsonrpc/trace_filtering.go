@@ -249,7 +249,7 @@ func (api *TraceAPIImpl) Block(ctx context.Context, blockNr rpc.BlockNumber, gas
 	for _, r := range rewards {
 		var tr ParityTrace
 		rewardAction := &RewardTraceAction{}
-		rewardAction.Author = r.Beneficiary.Value()
+		rewardAction.Author = r.Beneficiary
 		rewardAction.RewardType = rewardKindToString(r.Kind)
 		rewardAction.Value.ToInt().Set(r.Amount.ToBig())
 		tr.Action = rewardAction

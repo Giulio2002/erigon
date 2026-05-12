@@ -95,7 +95,7 @@ func TestPrestateTracerCreate2(t *testing.T) {
 		Code:    hexutil.MustDecode("0x63deadbeef60005263cafebabe6004601c6000F560005260206000F3"),
 		Balance: big.NewInt(1),
 	}
-	alloc[origin.Value()] = types.GenesisAccount{
+	alloc[origin] = types.GenesisAccount{
 		Nonce:   1,
 		Code:    []byte{},
 		Balance: big.NewInt(500000000000000),

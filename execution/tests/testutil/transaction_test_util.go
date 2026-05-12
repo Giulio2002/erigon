@@ -34,6 +34,7 @@ import (
 	"github.com/erigontech/erigon/execution/protocol/mdgas"
 	"github.com/erigontech/erigon/execution/tests/testforks"
 	"github.com/erigontech/erigon/execution/types"
+	"github.com/erigontech/erigon/execution/types/accounts"
 	"github.com/erigontech/erigon/execution/vm/evmtypes"
 )
 
@@ -85,7 +86,7 @@ func (tt *TransactionTest) Run(chainID *big.Int) error {
 			AuthorizationsLen:  authorizationsLen,
 			AccessListLen:      uint64(len(msg.AccessList())),
 			StorageKeysLen:     uint64(msg.AccessList().StorageKeys()),
-			IsContractCreation: msg.To().IsNil(),
+			IsContractCreation: msg.To() == accounts.NilAddress,
 			IsEIP2:             rules.IsHomestead,
 			IsEIP2028:          rules.IsIstanbul,
 			IsEIP3860:          rules.IsShanghai,
@@ -124,7 +125,7 @@ func (tt *TransactionTest) Run(chainID *big.Int) error {
 			return nil, nil, requiredGas, fmt.Errorf("%w: nonce: %d", protocol.ErrNonceMax, msg.Nonce())
 		}
 		h := tx.Hash()
-		senderValue := sender.Value()
+		senderValue := sender
 		return &senderValue, &h, requiredGas, nil
 	}
 

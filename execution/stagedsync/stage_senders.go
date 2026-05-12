@@ -163,8 +163,7 @@ func SpawnRecoverSendersStage(cfg SendersCfg, s *StageState, u Unwinder, tx kv.R
 					return
 				}
 				// Copy sender address to the correct position
-				fromValue := j.from.Value()
-				copy(pb.senders[j.txIndex*length.Addr:], fromValue[:])
+				copy(pb.senders[j.txIndex*length.Addr:], j.from[:])
 				pb.received++
 
 				// Check if block is complete

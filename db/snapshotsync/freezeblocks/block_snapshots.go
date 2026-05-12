@@ -706,7 +706,7 @@ func DumpTxs(ctx context.Context, db kv.RoDB, chainConfig *chain.Config, blockFr
 			if err != nil {
 				return nil, err
 			}
-			sender = s.Value()
+			sender = s
 		}
 
 		valueBuf = valueBuf[:0]

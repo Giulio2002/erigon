@@ -592,7 +592,7 @@ func NewRPCTransaction(txn types.Transaction, blockHash common.Hash, blockTime u
 	if err != nil {
 		log.Warn("sender recovery", "err", err)
 	} else {
-		result.From = from.Value()
+		result.From = from
 	}
 
 	if blockHash != (common.Hash{}) {

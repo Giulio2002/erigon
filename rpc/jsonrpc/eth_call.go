@@ -541,7 +541,7 @@ func (api *APIImpl) getProof(ctx context.Context, roTx kv.TemporalTx, address co
 
 	proof.Balance = (*hexutil.Big)(acc.Balance.ToBig())
 	proof.Nonce = hexutil.Uint64(acc.Nonce)
-	proof.CodeHash = acc.CodeHash.Value()
+	proof.CodeHash = acc.CodeHash
 	proof.StorageHash = acc.Root
 
 	// if storage is not empty touch keys and build trie
@@ -917,7 +917,7 @@ func (api *APIImpl) CreateAccessList(ctx context.Context, args ethapi2.CallArgs,
 	excl[*args.From] = struct{}{}
 	excl[to] = struct{}{}
 	for _, pc := range precompiles {
-		excl[pc.Value()] = struct{}{}
+		excl[pc] = struct{}{}
 	}
 
 	// EIP-7702: authority addresses are pre-warmed in state transition, so exclude them from the access list

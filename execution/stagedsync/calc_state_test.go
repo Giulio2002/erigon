@@ -84,7 +84,7 @@ func TestFlushToUpdates_DeletedWithIncarnation_EmitsZeroAccountUpdate(t *testing
 	updates := newTestUpdates()
 	cs.FlushToUpdates(updates)
 
-	keyVal := addr.Value()
+	keyVal := addr
 	got := lookupKeyUpdate(t, updates, string(keyVal[:]))
 
 	assert.Equal(t,
@@ -124,7 +124,7 @@ func TestFlushToUpdates_DeletedWithoutIncarnation_EmitsDelete(t *testing.T) {
 	updates := newTestUpdates()
 	cs.FlushToUpdates(updates)
 
-	keyVal := addr.Value()
+	keyVal := addr
 	got := lookupKeyUpdate(t, updates, string(keyVal[:]))
 
 	assert.Equal(t, commitment.DeleteUpdate, got.Flags,
@@ -172,7 +172,7 @@ func TestFlushToUpdates_DeletedWithRetainedBalance_EmitsRegularUpdate(t *testing
 	updates := newTestUpdates()
 	cs.FlushToUpdates(updates)
 
-	keyVal := addr.Value()
+	keyVal := addr
 	got := lookupKeyUpdate(t, updates, string(keyVal[:]))
 
 	assert.Equal(t,
@@ -204,7 +204,7 @@ func TestFlushToUpdates_LiveAccount_EmitsFullUpdate(t *testing.T) {
 	updates := newTestUpdates()
 	cs.FlushToUpdates(updates)
 
-	keyVal := addr.Value()
+	keyVal := addr
 	got := lookupKeyUpdate(t, updates, string(keyVal[:]))
 
 	assert.Equal(t,
@@ -246,7 +246,7 @@ func TestApplyWrites_IncarnationPath(t *testing.T) {
 
 	updates := newTestUpdates()
 	cs.FlushToUpdates(updates)
-	keyVal := addr.Value()
+	keyVal := addr
 	got := lookupKeyUpdate(t, updates, string(keyVal[:]))
 	assert.Equal(t,
 		commitment.DeleteUpdate,
@@ -420,7 +420,7 @@ func TestSDOfPreExistingContract_FullPipeline(t *testing.T) {
 
 	updates := newTestUpdates()
 	cs.FlushToUpdates(updates)
-	got := lookupKeyUpdate(t, updates, string(addr.Value().Bytes()))
+	got := lookupKeyUpdate(t, updates, string(addr.Bytes()))
 
 	// EIP-161-style DeleteUpdate (matches serial's DomainDel for a pure SD).
 	assert.Equal(t, commitment.DeleteUpdate, got.Flags,
@@ -514,7 +514,7 @@ func TestSDStorageCascade_EmitsPerSlotDeletes(t *testing.T) {
 	// Walk all emitted updates and assert that every storage update for
 	// our SD'd address is a DeleteUpdate (not StorageUpdate with the
 	// pre-SD value).
-	addrBytes := addr.Value()
+	addrBytes := addr
 	storageDeletes := 0
 	require.NoError(t, updates.HashSort(t.Context(), nil, func(_, k []byte, u *commitment.Update) error {
 		if len(k) != 52 {

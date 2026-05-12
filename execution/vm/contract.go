@@ -90,9 +90,9 @@ func (c *Contract) isCode(udest uint64) bool {
 		return c.analysis.codeSegment(udest)
 	}
 	var codeHash common.Hash
-	isCodeHashZero := c.CodeHash.IsZero()
+	isCodeHashZero := c.CodeHash == (common.Hash{})
 	if !isCodeHashZero {
-		codeHash = c.CodeHash.Value()
+		codeHash = c.CodeHash
 	}
 
 	if !isCodeHashZero {

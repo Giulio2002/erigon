@@ -184,7 +184,7 @@ func (pr *DefaultProofRetainer) ProofResult() (*accounts.AccProofResult, error) 
 		Address:  pr.addr,
 		Balance:  (*hexutil.Big)(pr.acc.Balance.ToBig()),
 		Nonce:    hexutil.Uint64(pr.acc.Nonce),
-		CodeHash: pr.acc.CodeHash.Value(),
+		CodeHash: pr.acc.CodeHash,
 	}
 
 	for _, pe := range pr.proofs {

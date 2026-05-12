@@ -118,7 +118,7 @@ func (tx *SetCodeTransaction) MarshalBinary(w io.Writer) error {
 func (tx *SetCodeTransaction) AsMessage(s Signer, baseFee *uint256.Int, rules *chain.Rules) (*Message, error) {
 	var to accounts.Address
 	if tx.To == nil {
-		to = accounts.NilAddress
+		to = accounts.ZeroAddress
 	} else {
 		to = accounts.InternAddress(*tx.To)
 	}
@@ -160,7 +160,7 @@ func (tx *SetCodeTransaction) AsMessage(s Signer, baseFee *uint256.Int, rules *c
 }
 
 func (tx *SetCodeTransaction) Sender(signer Signer) (accounts.Address, error) {
-	if from := tx.from; !from.IsNil() && !from.IsZero() {
+	if from := tx.from; from != (common.Address{}) {
 		// Sender address can never be zero in a transaction with a valid signer
 		return from, nil
 	}
@@ -387,6 +387,5 @@ func ParseDelegation(code []byte) (accounts.Address, bool) {
 
 // AddressToDelegation adds the delegation prefix to the specified address.
 func AddressToDelegation(addr accounts.Address) []byte {
-	addrVal := addr.Value()
-	return append(params.DelegatedDesignationPrefix, addrVal[:]...)
+	return append(params.DelegatedDesignationPrefix, addr[:]...)
 }

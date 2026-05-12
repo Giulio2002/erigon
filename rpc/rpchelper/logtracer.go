@@ -116,12 +116,10 @@ func (t *LogTracer) captureTransfer(from, to accounts.Address, value *uint256.In
 	if !t.traceTransfers {
 		return
 	}
-	fromValue := from.Value()
-	toValue := to.Value()
 	topics := []common.Hash{
 		transferTopic,
-		common.BytesToHash(fromValue[:]),
-		common.BytesToHash(toValue[:]),
+		common.BytesToHash(from[:]),
+		common.BytesToHash(to[:]),
 	}
 	t.captureLog(transferAddress, topics, common.BigToHash(value.ToBig()).Bytes())
 }

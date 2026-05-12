@@ -347,16 +347,16 @@ func TestBALBlock943ViaVersionedIO(t *testing.T) {
 	t.Logf("BAL accounts: %d", len(bal))
 	for i, ac := range bal {
 		t.Logf("  [%d] %s: storage_changes=%d storage_reads=%d balance_changes=%d nonce_changes=%d code_changes=%d",
-			i, ac.Address.Value().Hex(),
+			i, ac.Address.Hex(),
 			len(ac.StorageChanges), len(ac.StorageReads),
 			len(ac.BalanceChanges), len(ac.NonceChanges), len(ac.CodeChanges))
 		for _, sc := range ac.StorageChanges {
 			for _, ch := range sc.Changes {
-				t.Logf("    slot %s [%d] -> %s", sc.Slot.Value().Hex(), ch.Index, ch.Value.Hex())
+				t.Logf("    slot %s [%d] -> %s", sc.Slot.Hex(), ch.Index, ch.Value.Hex())
 			}
 		}
 		for _, sr := range ac.StorageReads {
-			t.Logf("    read slot %s", sr.Value().Hex())
+			t.Logf("    read slot %s", sr.Hex())
 		}
 	}
 

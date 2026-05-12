@@ -99,7 +99,7 @@ func (t *Tracer) OnTxStart(vm *tracing.VMContext, txn types.Transaction, from ac
 		OnTxStart: &OnTxStartTrace{
 			VMContext:   vm,
 			Transaction: txn,
-			From:        from.Value(),
+			From:        from,
 		},
 	})
 }
@@ -148,8 +148,8 @@ func (t *Tracer) OnEnter(depth int, typ byte, from, to accounts.Address, precomp
 		OnEnter: &OnEnterTrace{
 			Depth:      depth,
 			Type:       typ,
-			From:       from.Value(),
-			To:         to.Value(),
+			From:       from,
+			To:         to,
 			Precompile: precompile,
 			Input:      inputCopy,
 			Gas:        gas,
@@ -220,7 +220,7 @@ func (t *Tracer) OnOpcode(pc uint64, op byte, gas, cost uint64, opContext tracin
 			Op:         fmt.Sprintf("%v", vm.OpCode(op)),
 			Gas:        gas,
 			Cost:       cost,
-			Caller:     opContext.Caller().Value(),
+			Caller:     opContext.Caller(),
 			Stack:      stack,
 			Memory:     memory,
 			MemorySize: len(memory),
@@ -267,7 +267,7 @@ func (t *Tracer) OnFault(pc uint64, op byte, gas, cost uint64, opContext tracing
 			Op:         op,
 			Gas:        gas,
 			Cost:       cost,
-			Caller:     opContext.Caller().Value(),
+			Caller:     opContext.Caller(),
 			Stack:      stack,
 			Memory:     memory,
 			MemorySize: len(memory),
@@ -412,7 +412,7 @@ func (t *Tracer) OnBalanceChange(address accounts.Address, oldBalance, newBalanc
 
 	t.traces.Append(Trace{
 		OnBalanceChange: &OnBalanceChangeTrace{
-			Address:    address.Value(),
+			Address:    address,
 			OldBalance: oldBalance,
 			NewBalance: newBalance,
 			Reason:     fmt.Sprintf("%v", reason),
@@ -431,7 +431,7 @@ func (t *Tracer) OnNonceChange(address accounts.Address, oldNonce, newNonce uint
 
 	t.traces.Append(Trace{
 		OnNonceChange: &OnNonceChangeTrace{
-			Address:  address.Value(),
+			Address:  address,
 			OldNonce: oldNonce,
 			NewNonce: newNonce,
 		},
@@ -449,10 +449,10 @@ func (t *Tracer) OnCodeChange(address accounts.Address, prevCodeHash accounts.Co
 
 	t.traces.Append(Trace{
 		OnCodeChange: &OnCodeChangeTrace{
-			Address:      address.Value(),
-			PrevCodeHash: prevCodeHash.Value(),
+			Address:      address,
+			PrevCodeHash: prevCodeHash,
 			PrevCode:     prevCode,
-			NewCodeHash:  newCodeHash.Value(),
+			NewCodeHash:  newCodeHash,
 			NewCode:      newCode,
 		},
 	})
@@ -469,8 +469,8 @@ func (t *Tracer) OnStorageChange(address accounts.Address, slot accounts.Storage
 
 	t.traces.Append(Trace{
 		OnStorageChange: &OnStorageChangeTrace{
-			Address: address.Value(),
-			Slot:    slot.Value(),
+			Address: address,
+			Slot:    slot,
 			Prev:    prev,
 			New:     new,
 		},

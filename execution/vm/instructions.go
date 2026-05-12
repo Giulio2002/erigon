@@ -377,7 +377,7 @@ func opKeccak256(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte, error
 }
 
 func opAddress(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte, error) {
-	addrVal := scope.Contract.Address().Value()
+	addrVal := scope.Contract.Address()
 	scope.Stack.push(*new(uint256.Int).SetBytes(addrVal[:]))
 	return pc, nil, nil
 }
@@ -397,26 +397,26 @@ func opBalance(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte, error) 
 }
 
 func opOrigin(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte, error) {
-	if origin := evm.Origin; origin.IsNil() {
+	if origin := evm.Origin; origin == accounts.NilAddress {
 		scope.Stack.push(uint256.Int{})
 	} else {
-		originVal := origin.Value()
+		originVal := origin
 		scope.Stack.push(*new(uint256.Int).SetBytes(originVal[:]))
 	}
 	return pc, nil, nil
 }
 func opCaller(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte, error) {
-	if caller := scope.Contract.Caller(); caller.IsNil() {
+	if caller := scope.Contract.Caller(); caller == accounts.NilAddress {
 		scope.Stack.push(uint256.Int{})
 	} else {
-		callerValue := caller.Value()
+		callerValue := caller
 		scope.Stack.push(*new(uint256.Int).SetBytes(callerValue[:]))
 	}
 	return pc, nil, nil
 }
 
 func stCaller(_ uint64, scope *CallContext) string {
-	caller := scope.Contract.Caller().Value()
+	caller := scope.Contract.Caller()
 	return fmt.Sprintf("%s (%d)", CALLER, new(uint256.Int).SetBytes(caller[:]))
 }
 
@@ -659,7 +659,7 @@ func opExtCodeHash(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte, err
 		if err != nil {
 			return pc, nil, fmt.Errorf("%w: %w", ErrIntraBlockStateFailed, err)
 		}
-		codeHashValue := codeHash.Value()
+		codeHashValue := codeHash
 		slot.SetBytes(codeHashValue[:])
 	}
 	return pc, nil, nil
@@ -705,10 +705,10 @@ func stBlockhash(_ uint64, scope *CallContext) string {
 }
 
 func opCoinbase(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte, error) {
-	if coinbase := evm.Context.Coinbase; coinbase.IsNil() {
+	if coinbase := evm.Context.Coinbase; coinbase == accounts.NilAddress {
 		scope.Stack.push(uint256.Int{})
 	} else {
-		coinbaseValue := coinbase.Value()
+		coinbaseValue := coinbase
 		scope.Stack.push(*new(uint256.Int).SetBytes(coinbaseValue[:]))
 	}
 	return pc, nil, nil
@@ -1054,11 +1054,11 @@ func execCreate(pc uint64, evm *EVM, scope *CallContext, value uint256.Int, inpu
 	var result uint256.Int
 	if suberr != nil {
 		if !evm.ChainRules().IsHomestead && suberr == ErrCodeStoreOutOfGas {
-			addrVal := addr.Value()
+			addrVal := addr
 			result.SetBytes(addrVal[:])
 		}
 	} else {
-		addrVal := addr.Value()
+		addrVal := addr
 		result.SetBytes(addrVal[:])
 	}
 	scope.Stack.push(result)
@@ -1357,9 +1357,9 @@ func opSelfdestruct6780(pc uint64, evm *EVM, scope *CallContext) (uint64, []byte
 	}
 	if evm.ChainRules().IsAmsterdam && !balance.IsZero() { // EIP-7708
 		if self != beneficiaryAddr {
-			ibs.AddLog(misc.EthTransferLog(self.Value(), beneficiaryAddr.Value(), balance))
+			ibs.AddLog(misc.EthTransferLog(self, beneficiaryAddr, balance))
 		} else if newContract {
-			ibs.AddLog(misc.EthBurnLog(self.Value(), balance))
+			ibs.AddLog(misc.EthBurnLog(self, balance))
 		}
 	}
 	tracer := evm.Config().Tracer
@@ -1487,7 +1487,7 @@ func makeLog(size int) executionFunc {
 
 		d := scope.Memory.GetCopy(mStart.Uint64(), mSize.Uint64())
 		evm.IntraBlockState().AddLog(&types.Log{
-			Address: scope.Contract.Address().Value(),
+			Address: scope.Contract.Address(),
 			Topics:  topics,
 			Data:    d,
 			// This is a non-consensus field, but assigned here because

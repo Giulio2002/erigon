@@ -63,7 +63,7 @@ func TestCreate2Revive(t *testing.T) {
 				ConstantinopleBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): types.GenesisAccount{Balance: funds},
+				address: types.GenesisAccount{Balance: funds},
 			},
 		}
 		signer = types.LatestSignerForChainID(nil)
@@ -105,7 +105,7 @@ func TestCreate2Revive(t *testing.T) {
 			}
 			block.AddTx(txn)
 		case 2:
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), create2address.Value(), uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), create2address, uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -247,7 +247,7 @@ func TestCreate2Polymorth(t *testing.T) {
 				ConstantinopleBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): types.GenesisAccount{Balance: funds},
+				address: types.GenesisAccount{Balance: funds},
 			},
 		}
 		signer = types.LatestSignerForChainID(nil)
@@ -290,7 +290,7 @@ func TestCreate2Polymorth(t *testing.T) {
 			block.AddTx(txn)
 		case 2:
 			// Trigger self-destruct
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), create2address.Value(), uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), create2address, uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -307,7 +307,7 @@ func TestCreate2Polymorth(t *testing.T) {
 			block.AddTx(txn)
 		case 4:
 			// Trigger self-destruct
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), create2address.Value(), uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), create2address, uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -323,7 +323,7 @@ func TestCreate2Polymorth(t *testing.T) {
 			}
 			block.AddTx(txn)
 			// Trigger self-destruct
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), create2address.Value(), uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), create2address, uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -511,7 +511,7 @@ func TestReorgOverSelfDestruct(t *testing.T) {
 				ConstantinopleBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): types.GenesisAccount{Balance: funds},
+				address: types.GenesisAccount{Balance: funds},
 			},
 		}
 	)
@@ -674,7 +674,7 @@ func TestReorgOverStateChange(t *testing.T) {
 				ConstantinopleBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): {Balance: funds},
+				address: {Balance: funds},
 			},
 		}
 	)
@@ -838,7 +838,7 @@ func TestCreateOnExistingStorage(t *testing.T) {
 				ConstantinopleBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): {Balance: funds},
+				address: {Balance: funds},
 				// Pre-existing storage item in an account without code
 				contractAddr: {Balance: funds, Storage: map[common.Hash]common.Hash{{}: common.HexToHash("0x42")}},
 			},
@@ -984,7 +984,7 @@ func TestEip2200Gas(t *testing.T) {
 				IstanbulBlock:         common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): {Balance: funds},
+				address: {Balance: funds},
 			},
 		}
 	)
@@ -1088,7 +1088,7 @@ func TestWrongIncarnation(t *testing.T) {
 				SpuriousDragonBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): types.GenesisAccount{Balance: funds},
+				address: types.GenesisAccount{Balance: funds},
 			},
 		}
 	)
@@ -1212,7 +1212,7 @@ func TestWrongIncarnation2(t *testing.T) {
 				SpuriousDragonBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): types.GenesisAccount{Balance: funds},
+				address: types.GenesisAccount{Balance: funds},
 			},
 		}
 		signer = types.LatestSignerForChainID(nil)
@@ -1234,7 +1234,7 @@ func TestWrongIncarnation2(t *testing.T) {
 
 		switch i {
 		case 0:
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), knownContractAddress, uint256.NewInt(1000), 1000000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), knownContractAddress, uint256.NewInt(1000), 1000000, new(uint256.Int), nil), *signer, key)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1270,7 +1270,7 @@ func TestWrongIncarnation2(t *testing.T) {
 
 		switch i {
 		case 0:
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), knownContractAddress, uint256.NewInt(1000), 1000000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), knownContractAddress, uint256.NewInt(1000), 1000000, new(uint256.Int), nil), *signer, key)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1491,7 +1491,7 @@ func TestRecreateAndRewind(t *testing.T) {
 		gspec   = &types.Genesis{
 			Config: chain.TestChainBerlinConfig,
 			Alloc: types.GenesisAlloc{
-				address.Value(): types.GenesisAccount{Balance: funds},
+				address: types.GenesisAccount{Balance: funds},
 			},
 		}
 	)
@@ -1708,7 +1708,7 @@ func TestTxLookupUnwind(t *testing.T) {
 				ConstantinopleBlock:   common.NewUint64(1),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): types.GenesisAccount{Balance: funds},
+				address: types.GenesisAccount{Balance: funds},
 			},
 		}
 		signer = types.LatestSignerForChainID(nil)
@@ -1720,7 +1720,7 @@ func TestTxLookupUnwind(t *testing.T) {
 		var e error
 		switch i {
 		case 1:
-			txn, e = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), address.Value(), uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
+			txn, e = types.SignTx(types.NewTransaction(block.TxNonce(address), address, uint256.NewInt(0), 1000000, new(uint256.Int), nil), *signer, key)
 			if e != nil {
 				t.Fatal(e)
 			}

@@ -351,7 +351,7 @@ func TestZeroValueToNotExitCall(t *testing.T) {
 			Nonce: 1,
 			Code:  code,
 		},
-		origin.Value(): types.GenesisAccount{
+		origin: types.GenesisAccount{
 			Nonce:   0,
 			Balance: big.NewInt(500000000000000),
 		},

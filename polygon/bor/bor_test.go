@@ -241,7 +241,7 @@ func newValidator(t *testing.T, testHeimdall *testHeimdall, blocks map[uint64]*t
 		nil, /* blockReader */
 		&spanner{
 			ChainSpanner:     bor.NewChainSpanner(borabi.ValidatorSetContractABI(), testHeimdall.chainConfig, false, logger),
-			validatorAddress: validatorAddress.Value(),
+			validatorAddress: validatorAddress,
 		},
 		stateReceiver,
 		logger,
@@ -258,7 +258,7 @@ func newValidator(t *testing.T, testHeimdall *testHeimdall, blocks map[uint64]*t
 		testHeimdall.validatorSet = heimdall.NewValidatorSet([]*heimdall.Validator{
 			{
 				ID:               1,
-				Address:          validatorAddress.Value(),
+				Address:          validatorAddress,
 				VotingPower:      1000,
 				ProposerPriority: 1,
 			},
@@ -267,7 +267,7 @@ func newValidator(t *testing.T, testHeimdall *testHeimdall, blocks map[uint64]*t
 		testHeimdall.validatorSet.UpdateWithChangeSet([]*heimdall.Validator{
 			{
 				ID:               uint64(len(testHeimdall.validatorSet.Validators) + 1),
-				Address:          validatorAddress.Value(),
+				Address:          validatorAddress,
 				VotingPower:      1000,
 				ProposerPriority: 1,
 			},

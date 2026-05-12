@@ -44,9 +44,9 @@ func TestSystemCallStoragePropagation_DirectDomainPut(t *testing.T) {
 
 	// Write initial value (from snapshot)
 	composite := make([]byte, 20+32)
-	addrVal := addr.Value()
+	addrVal := addr
 	copy(composite, addrVal[:])
-	slotVal := slot.Value()
+	slotVal := slot
 	copy(composite[20:], slotVal[:])
 	sdMem[string(composite)] = values[0]
 
@@ -91,9 +91,9 @@ func TestSystemCallStoragePropagation_BlockStateCache(t *testing.T) {
 	sdMem := map[string][]byte{}
 
 	composite := make([]byte, 20+32)
-	addrVal := addr.Value()
+	addrVal := addr
 	copy(composite, addrVal[:])
-	slotVal := slot.Value()
+	slotVal := slot
 	copy(composite[20:], slotVal[:])
 
 	// Write initial value
@@ -145,8 +145,8 @@ func TestSystemCallStoragePropagation_BlockStateCache(t *testing.T) {
 			if op.kind != bcOpPutStorage {
 				continue
 			}
-			opAddrVal := op.addr.Value()
-			opKeyVal := op.key.Value()
+			opAddrVal := op.addr
+			opKeyVal := op.key
 			c := make([]byte, 20+32)
 			copy(c, opAddrVal[:])
 			copy(c[20:], opKeyVal[:])

@@ -778,7 +778,7 @@ func (b *Body) SendersFromTxs() []common.Address {
 	senders := make([]common.Address, len(b.Transactions))
 	for i, txn := range b.Transactions {
 		if sender, ok := txn.GetSender(); ok {
-			senders[i] = sender.Value()
+			senders[i] = sender
 		}
 	}
 	return senders

@@ -769,7 +769,7 @@ func TestAssembleBlockWithWithdrawalRequest(t *testing.T) {
 	calldata = append(calldata, make([]byte, 8)...) // amount=0
 
 	baseFee := chainPack.TopBlock.BaseFee().Uint64()
-	withdrawalAddr := params.WithdrawalRequestAddress.Value()
+	withdrawalAddr := params.WithdrawalRequestAddress
 	withdrawalTx, err := types.SignTx(
 		&types.LegacyTx{
 			CommonTx: types.CommonTx{
@@ -1364,7 +1364,7 @@ func TestEIP7708BurnLogWhenCoinbaseSelfDestructs(t *testing.T) {
 	var burnLog *types.Log
 	var burnCount, transferCount int
 	for _, log := range receipt.Logs {
-		if log.Address != params.SystemAddress.Value() || len(log.Topics) < 2 {
+		if log.Address != params.SystemAddress || len(log.Topics) < 2 {
 			continue
 		}
 		switch log.Topics[0] {

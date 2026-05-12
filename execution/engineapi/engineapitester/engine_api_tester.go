@@ -111,19 +111,19 @@ func DefaultEngineApiTesterGenesis() (*types.Genesis, *ecdsa.PrivateKey, error) 
 			coinbaseAddr: {
 				Balance: new(big.Int).Exp(big.NewInt(10), big.NewInt(21), nil), // 1_000 ETH
 			},
-			chainConfig.GetConsolidationRequestContract().Value(): {
+			chainConfig.GetConsolidationRequestContract(): {
 				Code:    consolidationRequestCode, // can't be empty
 				Storage: make(map[common.Hash]common.Hash),
 				Balance: new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil),
 				Nonce:   1,
 			},
-			chainConfig.GetWithdrawalRequestContract().Value(): {
+			chainConfig.GetWithdrawalRequestContract(): {
 				Code:    withdrawalRequestCode, // can't be empty
 				Storage: make(map[common.Hash]common.Hash),
 				Balance: new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil),
 				Nonce:   1,
 			},
-			params.BeaconRootsAddress.Value(): {
+			params.BeaconRootsAddress: {
 				Code:    beaconRootsCode,
 				Nonce:   1,
 				Balance: new(big.Int),

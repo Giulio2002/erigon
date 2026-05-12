@@ -61,8 +61,8 @@ func addTransferLog(
 		Topics: []common.Hash{
 			eventSig,
 			feeAddress.Hash(),
-			sender.Value().Hash(),
-			recipient.Value().Hash(),
+			sender.Hash(),
+			recipient.Hash(),
 		},
 		Data: data,
 	})

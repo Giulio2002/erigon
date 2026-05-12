@@ -155,7 +155,7 @@ func TestAllocConstructor(t *testing.T) {
 	genSpec := &types.Genesis{
 		Config: chain.AllProtocolChanges,
 		Alloc: types.GenesisAlloc{
-			address.Value(): {Constructor: deploymentCode, Balance: funds},
+			address: {Constructor: deploymentCode, Balance: funds},
 		},
 	}
 

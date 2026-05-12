@@ -93,27 +93,27 @@ func (t *TransactionTracer) OnEnter(depth int, typRaw byte, from accounts.Addres
 
 	var entry *TraceEntry
 	if typ == vm.CALL {
-		entry = &TraceEntry{"CALL", t.depth, from.Value(), to.Value(), (*hexutil.Big)(_value), inputCopy, nil}
+		entry = &TraceEntry{"CALL", t.depth, from, to, (*hexutil.Big)(_value), inputCopy, nil}
 	} else if typ == vm.STATICCALL {
-		entry = &TraceEntry{"STATICCALL", t.depth, from.Value(), to.Value(), nil, inputCopy, nil}
+		entry = &TraceEntry{"STATICCALL", t.depth, from, to, nil, inputCopy, nil}
 	} else if typ == vm.DELEGATECALL {
-		entry = &TraceEntry{"DELEGATECALL", t.depth, from.Value(), to.Value(), nil, inputCopy, nil}
+		entry = &TraceEntry{"DELEGATECALL", t.depth, from, to, nil, inputCopy, nil}
 	} else if typ == vm.CALLCODE {
-		entry = &TraceEntry{"CALLCODE", t.depth, from.Value(), to.Value(), (*hexutil.Big)(_value), inputCopy, nil}
+		entry = &TraceEntry{"CALLCODE", t.depth, from, to, (*hexutil.Big)(_value), inputCopy, nil}
 	} else if typ == vm.CREATE {
-		entry = &TraceEntry{"CREATE", t.depth, from.Value(), to.Value(), (*hexutil.Big)(value.ToBig()), inputCopy, nil}
+		entry = &TraceEntry{"CREATE", t.depth, from, to, (*hexutil.Big)(value.ToBig()), inputCopy, nil}
 	} else if typ == vm.CREATE2 {
-		entry = &TraceEntry{"CREATE2", t.depth, from.Value(), to.Value(), (*hexutil.Big)(value.ToBig()), inputCopy, nil}
+		entry = &TraceEntry{"CREATE2", t.depth, from, to, (*hexutil.Big)(value.ToBig()), inputCopy, nil}
 	} else if typ == vm.SELFDESTRUCT {
 		selfDestructDepth := depth
 		if len(t.Results) > 0 {
 			selfDestructDepth = t.Results[len(t.Results)-1].Depth + 1
 		}
-		entry = &TraceEntry{"SELFDESTRUCT", selfDestructDepth, from.Value(), to.Value(), (*hexutil.Big)(value.ToBig()), nil, nil}
+		entry = &TraceEntry{"SELFDESTRUCT", selfDestructDepth, from, to, (*hexutil.Big)(value.ToBig()), nil, nil}
 	} else {
 		// safeguard in case new CALL-like opcodes are introduced but not handled,
 		// otherwise CaptureExit/stack will get out of sync
-		entry = &TraceEntry{"UNKNOWN", t.depth, from.Value(), to.Value(), (*hexutil.Big)(value.ToBig()), inputCopy, nil}
+		entry = &TraceEntry{"UNKNOWN", t.depth, from, to, (*hexutil.Big)(value.ToBig()), inputCopy, nil}
 	}
 
 	// Ignore precompiles in the returned trace (maybe we shouldn't?)

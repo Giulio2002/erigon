@@ -1068,7 +1068,7 @@ func (c *AuRa) IsServiceTransaction(sender accounts.Address, syscall rules.Syste
 	if c.certifier == nil {
 		return false
 	}
-	packed, err := certifierAbi().Pack("certified", sender.Value())
+	packed, err := certifierAbi().Pack("certified", sender)
 	if err != nil {
 		panic(err)
 	}

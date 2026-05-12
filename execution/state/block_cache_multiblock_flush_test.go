@@ -60,8 +60,8 @@ func TestBlockStateCacheFlushClearsAcrossBlocks(t *testing.T) {
 
 	addr := accounts.InternAddress([20]byte{0x00, 0x00, 0x09, 0x61, 0xef, 0x48})
 	slot := accounts.InternKey([32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01})
-	slotVal := slot.Value()
-	addrVal := addr.Value()
+	slotVal := slot
+	addrVal := addr
 	composite := append(append([]byte(nil), addrVal[:]...), slotVal[:]...)
 
 	// Share one cache across both blocks — this is the production pattern
@@ -145,7 +145,7 @@ func TestBlockStateCacheFlushPreservesPerTxHistory(t *testing.T) {
 	domains.SetInMemHistoryReads(true)
 
 	addr := accounts.InternAddress([20]byte{0xc0, 0x1b, 0xa5, 0xeb, 0xeb, 0xeb})
-	addrVal := addr.Value()
+	addrVal := addr
 
 	// Pre-block: account exists at the test's first txNum boundary with
 	// some baseline balance.

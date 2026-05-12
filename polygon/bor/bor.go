@@ -659,7 +659,7 @@ func (c *Bor) verifySeal(chain rules.ChainHeaderReader, header *types.Header, pa
 
 		difficulty := validatorSet.SafeDifficulty(signer)
 		if header.Difficulty.Uint64() != difficulty {
-			signerValue := signer.Value()
+			signerValue := signer
 			return &WrongDifficultyError{number, difficulty, header.Difficulty.Uint64(), signerValue[:]}
 		}
 	}
@@ -761,7 +761,7 @@ func (c *Bor) Prepare(chain rules.ChainHeaderReader, header *types.Header, state
 	var succession int
 	signer := c.authorizedSigner.Load().signer
 	// if signer is not empty
-	if !signer.IsZero() {
+	if signer != accounts.NilAddress {
 		succession, err = validatorSet.GetSignerSuccessionNumber(signer, number)
 		if err != nil {
 			return err

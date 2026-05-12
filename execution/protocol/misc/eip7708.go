@@ -46,7 +46,7 @@ var (
 func EthTransferLog(from, to common.Address, amount uint256.Int) *types.Log {
 	amount32 := amount.Bytes32()
 	return &types.Log{
-		Address: params.SystemAddress.Value(),
+		Address: params.SystemAddress,
 		Topics: []common.Hash{
 			EthTransferLogEvent,
 			from.Hash(),
@@ -61,7 +61,7 @@ func EthTransferLog(from, to common.Address, amount uint256.Int) *types.Log {
 func EthBurnLog(from common.Address, amount uint256.Int) *types.Log {
 	amount32 := amount.Bytes32()
 	return &types.Log{
-		Address: params.SystemAddress.Value(),
+		Address: params.SystemAddress,
 		Topics: []common.Hash{
 			EthBurnLogEvent,
 			from.Hash(),
@@ -83,7 +83,7 @@ func Transfer(db evmtypes.IntraBlockState, sender, recipient accounts.Address, a
 		return err
 	}
 	if rules.IsAmsterdam && !amount.IsZero() && sender != recipient { // EIP-7708
-		db.AddLog(EthTransferLog(sender.Value(), recipient.Value(), amount))
+		db.AddLog(EthTransferLog(sender, recipient, amount))
 	}
 	return nil
 }

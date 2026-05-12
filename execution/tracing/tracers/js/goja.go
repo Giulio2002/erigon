@@ -245,9 +245,7 @@ func (t *jsTracer) OnTxStart(env *tracing.VMContext, tx types.Transaction, from 
 	}
 	t.ctx["gasPrice"] = gasPriceBig
 	var coinbaseValue common.Address
-	if !env.Coinbase.IsNil() {
-		coinbaseValue = env.Coinbase.Value()
-	}
+	coinbaseValue = env.Coinbase
 	coinbase, err := t.toBuf(t.vm, coinbaseValue[:])
 	if err != nil {
 		t.err = err
@@ -279,9 +277,9 @@ func (t *jsTracer) onStart(from accounts.Address, to accounts.Address, create bo
 	} else {
 		t.ctx["type"] = t.vm.ToValue("CALL")
 	}
-	fromValue := from.Value()
+	fromValue := from
 	t.ctx["from"] = t.vm.ToValue(fromValue[:])
-	toValue := to.Value()
+	toValue := to
 	t.ctx["to"] = t.vm.ToValue(toValue[:])
 	t.ctx["input"] = t.vm.ToValue(input)
 	valueBig, err := t.toBig(t.vm, value.ToBig().String())
@@ -813,7 +811,7 @@ type contractObj struct {
 }
 
 func (co *contractObj) GetCaller() goja.Value {
-	callerValue := co.scope.Caller().Value()
+	callerValue := co.scope.Caller()
 	res, err := co.toBuf(co.vm, callerValue[:])
 	if err != nil {
 		co.vm.Interrupt(err)
@@ -823,7 +821,7 @@ func (co *contractObj) GetCaller() goja.Value {
 }
 
 func (co *contractObj) GetAddress() goja.Value {
-	addrValue := co.scope.Address().Value()
+	addrValue := co.scope.Address()
 	res, err := co.toBuf(co.vm, addrValue[:])
 	if err != nil {
 		co.vm.Interrupt(err)
@@ -879,7 +877,7 @@ func (f *callframe) GetType() string {
 }
 
 func (f *callframe) GetFrom() goja.Value {
-	fromValue := f.from.Value()
+	fromValue := f.from
 	res, err := f.toBuf(f.vm, fromValue[:])
 	if err != nil {
 		f.vm.Interrupt(err)
@@ -889,7 +887,7 @@ func (f *callframe) GetFrom() goja.Value {
 }
 
 func (f *callframe) GetTo() goja.Value {
-	toValue := f.to.Value()
+	toValue := f.to
 	res, err := f.toBuf(f.vm, toValue[:])
 	if err != nil {
 		f.vm.Interrupt(err)

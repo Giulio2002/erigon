@@ -132,7 +132,7 @@ func simTestBackend(t *testing.T, testAddr common.Address) *SimulatedBackend {
 func TestNewSimulatedBackend(t *testing.T) {
 	testAddr := accounts.InternAddress(crypto.PubkeyToAddress(testKey.PublicKey))
 	expectedBal := uint256.NewInt(10000000000)
-	sim := simTestBackend(t, testAddr.Value())
+	sim := simTestBackend(t, testAddr)
 
 	if sim.m.ChainConfig != chain.TestChainBerlinConfig {
 		t.Errorf("expected sim config to equal chain.TestChainBerlinConfig, got %v", sim.m.ChainConfig)

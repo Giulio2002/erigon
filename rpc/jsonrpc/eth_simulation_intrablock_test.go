@@ -63,11 +63,11 @@ func TestSimulationIntraBlockHasStorageRAMBatch(t *testing.T) {
 
 	// Contract address whose storage we'll write during "block 1" simulation.
 	contractAddr := accounts.InternAddress(common.Address{0xcc, 0x01})
-	addrVal := contractAddr.Value() // [20]byte
+	addrVal := contractAddr // [20]byte
 
 	// Storage slot 0: key = address (20 bytes) || slot (32 bytes).
 	slotKey := accounts.InternKey(common.Hash{}) // slot 0x00...00
-	slotVal := slotKey.Value()                   // [32]byte
+	slotVal := slotKey                           // [32]byte
 
 	storageKey := append(addrVal[:], slotVal[:]...)
 

@@ -57,7 +57,7 @@ func TestSelfDestructReceive(t *testing.T) {
 				SpuriousDragonBlock:   new(uint64),
 			},
 			Alloc: types.GenesisAlloc{
-				address.Value(): {Balance: funds},
+				address: {Balance: funds},
 			},
 		}
 		// this code generates a log
@@ -94,7 +94,7 @@ func TestSelfDestructReceive(t *testing.T) {
 			}
 			block.AddTx(txn)
 			// Send 1 wei to contract after self-destruction
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address.Value()), contractAddress, uint256.NewInt(1000), 21000, uint256.NewInt(1), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), contractAddress, uint256.NewInt(1000), 21000, uint256.NewInt(1), nil), *signer, key)
 			block.AddTx(txn)
 		}
 		contractBackend.Commit()

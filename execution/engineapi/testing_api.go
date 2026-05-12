@@ -107,7 +107,7 @@ func (t *testingImpl) decodeTxnProvider(ctx context.Context, transactions *[]hex
 		if _, seen := expectedNonce[sender]; !seen {
 			var stateNonce uint64
 			if reader != nil {
-				acc, err := reader.ReadAccountData(accounts.InternAddress(sender.Value()))
+				acc, err := reader.ReadAccountData(accounts.InternAddress(sender))
 				if err != nil {
 					return nil, fmt.Errorf("testing_buildBlockV1: ReadAccountData error: %w", err)
 				}
@@ -120,10 +120,10 @@ func (t *testingImpl) decodeTxnProvider(ctx context.Context, transactions *[]hex
 		want := expectedNonce[sender]
 		got := tx.GetNonce()
 		if got > want {
-			return nil, &rpc.CustomError{Code: rpc.ErrCodeDefault, Message: fmt.Sprintf("nonce too high: address %v, tx: %d state: %d", sender.Value(), got, want)}
+			return nil, &rpc.CustomError{Code: rpc.ErrCodeDefault, Message: fmt.Sprintf("nonce too high: address %v, tx: %d state: %d", sender, got, want)}
 		}
 		if got < want {
-			return nil, &rpc.CustomError{Code: rpc.ErrCodeDefault, Message: fmt.Sprintf("nonce too low: address %v, tx: %d state: %d", sender.Value(), got, want)}
+			return nil, &rpc.CustomError{Code: rpc.ErrCodeDefault, Message: fmt.Sprintf("nonce too low: address %v, tx: %d state: %d", sender, got, want)}
 		}
 		expectedNonce[sender]++
 		decoded = append(decoded, tx)

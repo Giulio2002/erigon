@@ -163,12 +163,10 @@ func (t *callTracer) CaptureStart(env *vm.EVM, from accounts.Address, to account
 		return
 	}
 	var toValue common.Address
-	if !to.IsNil() {
-		toValue = to.Value()
-	}
+	toValue = to
 	t.callstack[0] = callFrame{
 		Type:  vm.CALL,
-		From:  from.Value(),
+		From:  from,
 		To:    toValue,
 		Input: common.Copy(input),
 		Gas:   t.gasLimit, // gas has intrinsicGas already subtracted
@@ -209,12 +207,10 @@ func (t *callTracer) OnEnter(depth int, typ byte, from accounts.Address, to acco
 	}
 
 	var toValue common.Address
-	if !to.IsNil() {
-		toValue = to.Value()
-	}
+	toValue = to
 	call := callFrame{
 		Type:  vm.OpCode(typ),
-		From:  from.Value(),
+		From:  from,
 		To:    toValue,
 		Input: common.Copy(input),
 		Gas:   gas,

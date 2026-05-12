@@ -191,7 +191,7 @@ func (t *prestateTracer) OnOpcode(pc uint64, opcode byte, gas, cost uint64, scop
 
 	case op == vm.CREATE:
 		nonce, _ := t.env.IntraBlockState.GetNonce(caller)
-		addr := accounts.InternAddress(types.CreateAddress(caller.Value(), nonce))
+		addr := accounts.InternAddress(types.CreateAddress(caller, nonce))
 		t.lookupAccount(addr)
 		t.created[addr] = true
 	case stackLen >= 4 && op == vm.CREATE2:
@@ -204,7 +204,7 @@ func (t *prestateTracer) OnOpcode(pc uint64, opcode byte, gas, cost uint64, scop
 		}
 		inithash := accounts.InternCodeHash(crypto.HashData(init))
 		salt := stackData[stackLen-4]
-		addr := accounts.InternAddress(types.CreateAddress2(caller.Value(), salt.Bytes32(), inithash))
+		addr := accounts.InternAddress(types.CreateAddress2(caller, salt.Bytes32(), inithash))
 		t.lookupAccount(addr)
 		t.created[addr] = true
 	}
@@ -217,7 +217,7 @@ func (t *prestateTracer) OnTxStart(env *tracing.VMContext, tx types.Transaction,
 
 	if tx.GetTo() == nil {
 		t.create = true
-		t.to = accounts.InternAddress(types.CreateAddress(from.Value(), nounce))
+		t.to = accounts.InternAddress(types.CreateAddress(from, nounce))
 	} else {
 		t.to = accounts.InternAddress(*tx.GetTo())
 		t.create = false
@@ -286,7 +286,7 @@ func (t *prestateTracer) processDiffState() {
 		// GetCode returns empty bytes for both deleted and codeless accounts;
 		// GetCodeHash distinguishes them (deleted → zero hash).
 		codeHash, _ := t.env.IntraBlockState.GetCodeHash(addr)
-		newCodeHash := codeHash.Value()
+		newCodeHash := codeHash
 
 		newBalanceBig := newBalance.ToBig()
 		if newBalanceBig.Cmp(state.Balance) != 0 {

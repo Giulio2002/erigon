@@ -265,8 +265,7 @@ func (hr *cachedHistoryReaderV3) SetTxNum(txNum uint64) {
 }
 
 func (hr *cachedHistoryReaderV3) ReadAccountData(address accounts.Address) (*accounts.Account, error) {
-	addressValue := address.Value()
-	enc, ok, err := hr.cache.GetAsOf(addressValue[:], hr.reader.GetTxNum())
+	enc, ok, err := hr.cache.GetAsOf(address[:], hr.reader.GetTxNum())
 
 	if err != nil {
 		return nil, err
@@ -293,9 +292,7 @@ func (hr *cachedHistoryReaderV3) ReadAccountDataForDebug(address accounts.Addres
 }
 
 func (hr *cachedHistoryReaderV3) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addressValue := address.Value()
-	keyValue := key.Value()
-	enc, ok, err := hr.cache.GetAsOf(append(addressValue[:], keyValue[:]...), hr.reader.GetTxNum())
+	enc, ok, err := hr.cache.GetAsOf(append(address[:], key[:]...), hr.reader.GetTxNum())
 	if err != nil {
 		return uint256.Int{}, false, err
 	}

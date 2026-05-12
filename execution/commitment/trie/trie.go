@@ -550,7 +550,7 @@ func (t *Trie) UpdateAccountCode(key []byte, code CodeNode) error {
 	}
 
 	actualCodeHash := crypto.HashData(code)
-	if accNode.CodeHash.Value() != actualCodeHash {
+	if accNode.CodeHash != actualCodeHash {
 		return fmt.Errorf("inserted code mismatch account hash (acc.CodeHash=%x codeHash=%x)", accNode.CodeHash, actualCodeHash)
 	}
 
@@ -600,7 +600,7 @@ func (t *Trie) NewLoadRequestForCode(addrHash common.Hash, codeHash accounts.Cod
 }
 
 func (t *Trie) NeedLoadCode(addrHash common.Hash, codeHash accounts.CodeHash, bytecode bool) (bool, *LoadRequestForCode) {
-	if codeHash.IsEmpty() {
+	if codeHash == accounts.EmptyCodeHash || codeHash == (common.Hash{}) {
 		return false, nil
 	}
 

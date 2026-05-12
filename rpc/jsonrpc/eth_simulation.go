@@ -1044,7 +1044,7 @@ func (r *simulationIntraBlockStateReader) getEncoded(domain kv.Domain, key []byt
 }
 
 func (r *simulationIntraBlockStateReader) ReadAccountData(address accounts.Address) (*accounts.Account, error) {
-	addressValue := address.Value()
+	addressValue := address
 	enc, err := r.getEncoded(kv.AccountsDomain, addressValue[:])
 	if err != nil || len(enc) == 0 {
 		return nil, err
@@ -1061,8 +1061,8 @@ func (r *simulationIntraBlockStateReader) ReadAccountDataForDebug(address accoun
 }
 
 func (r *simulationIntraBlockStateReader) ReadAccountStorage(address accounts.Address, key accounts.StorageKey) (uint256.Int, bool, error) {
-	addressValue := address.Value()
-	keyValue := key.Value()
+	addressValue := address
+	keyValue := key
 	r.composite = append(append(r.composite[:0], addressValue[:]...), keyValue[:]...)
 	enc, err := r.getEncoded(kv.StorageDomain, r.composite)
 	if err != nil {
@@ -1076,7 +1076,7 @@ func (r *simulationIntraBlockStateReader) ReadAccountStorage(address accounts.Ad
 }
 
 func (r *simulationIntraBlockStateReader) HasStorage(address accounts.Address) (bool, error) {
-	addressValue := address.Value()
+	addressValue := address
 
 	// Check the RAM batch first: storage written by prior simulated blocks lives only in the
 	// in-memory btree and is not yet visible via RangeAsOf(firstMinTxNum).
@@ -1106,7 +1106,7 @@ func (r *simulationIntraBlockStateReader) HasStorage(address accounts.Address) (
 }
 
 func (r *simulationIntraBlockStateReader) ReadAccountCode(address accounts.Address) ([]byte, error) {
-	addressValue := address.Value()
+	addressValue := address
 	return r.getEncoded(kv.CodeDomain, addressValue[:])
 }
 
@@ -1163,15 +1163,15 @@ func (s *simulator) computeCommitmentFromStateHistory(
 		tsd.GetCommitmentCtx().SetStateReader(newSimulateStateReader(ttx, tx, tsd, sd))
 		storageFullKey := make([]byte, length.Addr+length.Hash)
 		for address, locations := range touched {
-			addressKey := address.Value().Bytes()
+			addressKey := address.Bytes()
 			tsd.GetCommitmentCtx().TouchKey(kv.AccountsDomain, string(addressKey), nil)
-			s.logger.Debug("Touch key", "domain", kv.AccountsDomain, "key", address.Value().Hex()[2:])
+			s.logger.Debug("Touch key", "domain", kv.AccountsDomain, "key", address.Hex()[2:])
 			for _, loc := range locations {
-				locationKey := loc.Value().Bytes()
+				locationKey := loc.Bytes()
 				copy(storageFullKey[:length.Addr], addressKey)
 				copy(storageFullKey[length.Addr:], locationKey)
 				tsd.GetCommitmentCtx().TouchKey(kv.StorageDomain, string(storageFullKey), nil)
-				s.logger.Debug("Touch key", "domain", kv.StorageDomain, "key", address.Value().Hex()[2:]+loc.Value().Hex()[2:])
+				s.logger.Debug("Touch key", "domain", kv.StorageDomain, "key", address.Hex()[2:]+loc.Hex()[2:])
 			}
 		}
 

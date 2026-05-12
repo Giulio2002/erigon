@@ -209,7 +209,7 @@ func (tx *AccountAbstractionTransaction) payloadSize() (payloadSize, accessListL
 	payloadSize += rlp.U64Len(tx.Nonce)
 
 	payloadSize++
-	if !tx.SenderAddress.IsNil() {
+	if tx.SenderAddress != (common.Address{}) {
 		payloadSize += 20
 	}
 
@@ -293,9 +293,8 @@ func (tx *AccountAbstractionTransaction) encodePayload(w io.Writer, b []byte, pa
 	}
 
 	var senderAddress *common.Address
-	if !tx.SenderAddress.IsNil() {
-		senderValue := tx.SenderAddress.Value()
-		senderAddress = &senderValue
+	if tx.SenderAddress != (common.Address{}) {
+		senderAddress = &tx.SenderAddress
 
 	}
 	if err := EncodeOptionalAddress(senderAddress, w, b); err != nil {
@@ -653,7 +652,7 @@ func (tx *AccountAbstractionTransaction) AbiEncode() ([]byte, error) {
 	}
 
 	record := &ABIAccountAbstractTxn{
-		Sender:                      tx.SenderAddress.Value(),
+		Sender:                      tx.SenderAddress,
 		NonceKey:                    tx.NonceKey.ToBig(),
 		Nonce:                       big.NewInt(int64(tx.Nonce)),
 		ValidationGasLimit:          big.NewInt(int64(tx.ValidationGasLimit)),

@@ -103,8 +103,8 @@ func TestFilterWritesByVersionMap_MultipleAddresses(t *testing.T) {
 	// Verify the correct entries
 	paths := make(map[[20]byte][]state.AccountPath)
 	for _, w := range filtered {
-		paths[w.Address.Value()] = append(paths[w.Address.Value()], w.Path)
+		paths[w.Address] = append(paths[w.Address], w.Path)
 	}
-	assert.Equal(t, []state.AccountPath{state.BalancePath}, paths[addr1.Value()])
-	assert.Equal(t, []state.AccountPath{state.BalancePath, state.NoncePath}, paths[addr2.Value()])
+	assert.Equal(t, []state.AccountPath{state.BalancePath}, paths[addr1])
+	assert.Equal(t, []state.AccountPath{state.BalancePath, state.NoncePath}, paths[addr2])
 }

@@ -125,8 +125,7 @@ func (a *Account) EncodeForStorage(buffer []byte) {
 	if !a.IsEmptyCodeHash() {
 		fieldSet |= 8
 		buffer[pos] = 32
-		codeHashValue := a.CodeHash.Value()
-		copy(buffer[pos+1:], codeHashValue[:])
+		copy(buffer[pos+1:], a.CodeHash[:])
 		//pos += 33
 	}
 
@@ -249,8 +248,7 @@ func (a *Account) EncodeForHashing(buffer []byte) {
 	pos += 32
 	buffer[pos] = 128 + 32
 	pos++
-	codeHashValue := a.CodeHash.Value()
-	copy(buffer[pos:], codeHashValue[:])
+	copy(buffer[pos:], a.CodeHash[:])
 	//pos += 32
 }
 
@@ -581,7 +579,7 @@ func (a *Account) DecodeRLP(s *rlp.Stream) error {
 }
 
 func (a *Account) IsEmptyCodeHash() bool {
-	return a.CodeHash.IsEmpty()
+	return a.CodeHash == empty.CodeHash || a.CodeHash == (common.Hash{})
 }
 
 func (a *Account) IsEmptyRoot() bool {
@@ -690,8 +688,7 @@ func SerialiseV3(a *Account) []byte {
 	} else {
 		value[pos] = 32
 		pos++
-		codeHashValue := a.CodeHash.Value()
-		copy(value[pos:pos+32], codeHashValue[:])
+		copy(value[pos:pos+32], a.CodeHash[:])
 		pos += 32
 	}
 	if a.Incarnation == 0 {

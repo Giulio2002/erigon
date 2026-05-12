@@ -32,7 +32,7 @@ func TestVerifyBranchHashes_RoundTrip(t *testing.T) {
 	}
 	c.Nonce = acc.Nonce
 	c.Balance.Set(&acc.Balance)
-	c.CodeHash = acc.CodeHash.Value()
+	c.CodeHash = acc.CodeHash
 	c.Flags = BalanceUpdate | NonceUpdate | CodeUpdate
 	c.loaded = cellLoadAccount
 
@@ -122,7 +122,7 @@ func TestVerifyBranchHashes_Singleton(t *testing.T) {
 	}
 	c.Nonce = acc.Nonce
 	c.Balance.Set(&acc.Balance)
-	c.CodeHash = acc.CodeHash.Value()
+	c.CodeHash = acc.CodeHash
 	c.Flags = BalanceUpdate | NonceUpdate | CodeUpdate | StorageUpdate
 	c.loaded = cellLoadAccount | cellLoadStorage
 
@@ -212,7 +212,7 @@ func TestVerifyBranchHashes_SingletonDepth1(t *testing.T) {
 	}
 	c.Nonce = acc.Nonce
 	c.Balance.Set(&acc.Balance)
-	c.CodeHash = acc.CodeHash.Value()
+	c.CodeHash = acc.CodeHash
 	c.Flags = BalanceUpdate | NonceUpdate | CodeUpdate | StorageUpdate
 	c.loaded = cellLoadAccount | cellLoadStorage
 

@@ -423,7 +423,7 @@ func (ctx *TxnParseContext) ParseTransaction(payload []byte, pos int, slot *TxnS
 	// Step 8: Recover sender if needed.
 	if ctx.withSender && len(sender) == length.Addr {
 		if aaTx, ok := txn.(*types.AccountAbstractionTransaction); ok {
-			senderAddr := aaTx.SenderAddress.Value()
+			senderAddr := aaTx.SenderAddress
 			copy(sender, senderAddr[:])
 			if aaTx.Paymaster != nil {
 				copy(sender, aaTx.Paymaster[:])
@@ -437,7 +437,7 @@ func (ctx *TxnParseContext) ParseTransaction(payload []byte, pos int, slot *TxnS
 			if err != nil {
 				return 0, fmt.Errorf("%w: recovering sender from signature: %s", ErrParseTxn, err) //nolint
 			}
-			addrBytes := addr.Value()
+			addrBytes := addr
 			copy(sender, addrBytes[:])
 		}
 	}
@@ -575,7 +575,7 @@ func (tx *TxnSlot) ToProtoAccountAbstractionTxn() *typesproto.AccountAbstraction
 		nonceKey = aaTx.NonceKey.Bytes()
 	}
 
-	senderAddr := aaTx.SenderAddress.Value()
+	senderAddr := aaTx.SenderAddress
 	return &typesproto.AccountAbstractionTransaction{
 		Nonce:                       aaTx.Nonce,
 		ChainId:                     aaTx.ChainID.Bytes(),

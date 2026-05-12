@@ -201,8 +201,8 @@ func validationValidation(tx *types.AccountAbstractionTransaction, header *types
 	if ept.Input == nil {
 		return errors.New("account validation did not call the EntryPoint 'acceptAccount' callback")
 	}
-	fromValue := ept.From.Value()
-	senderAddress := tx.SenderAddress.Value()
+	fromValue := ept.From
+	senderAddress := tx.SenderAddress
 	if !bytes.Equal(fromValue[:], senderAddress[:]) {
 		return fmt.Errorf("invalid call to EntryPoint contract from a wrong account address, wanted %s got %s", tx.SenderAddress.String(), ept.From)
 	}
@@ -221,7 +221,7 @@ func paymasterValidation(tx *types.AccountAbstractionTransaction, header *types.
 	if ept.Input == nil {
 		return nil, errors.New("paymaster validation did not call the EntryPoint 'acceptPaymaster' callback")
 	}
-	fromValue := ept.From.Value()
+	fromValue := ept.From
 	if !bytes.Equal(fromValue[:], tx.Paymaster[:]) {
 		return nil, errors.New("invalid call to EntryPoint contract from a wrong paymaster address")
 	}
@@ -313,7 +313,7 @@ func ExecuteAATransaction(
 		return 0, 0, err
 	}
 
-	if err = payCoinbase(header, tx, ibs, gasUsed-gasRefund, evm.Context.Coinbase.Value()); err != nil {
+	if err = payCoinbase(header, tx, ibs, gasUsed-gasRefund, evm.Context.Coinbase); err != nil {
 		return 0, 0, err
 	}
 

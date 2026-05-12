@@ -170,7 +170,7 @@ func createBlock(ctx context.Context, sd *execctx.SharedDomains, tx kv.TemporalT
 		header.GasLimit = parent.GasLimit
 	}
 
-	header.Coinbase = coinbase.Value()
+	header.Coinbase = coinbase
 	header.Extra = cfg.builder.BuilderConfig.ExtraData
 
 	logger.Info(fmt.Sprintf("[%s] Start building", logPrefix), "block", executionAt+1, "baseFee", header.BaseFee, "gasLimit", header.GasLimit)

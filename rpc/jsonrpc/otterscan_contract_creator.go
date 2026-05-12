@@ -187,6 +187,6 @@ func (api *OtterscanAPIImpl) GetContractCreator(ctx context.Context, addr common
 	}
 	return &ContractCreatorData{
 		Tx:      tracer.Tx.Hash(),
-		Creator: tracer.Creator.Value(),
+		Creator: tracer.Creator,
 	}, nil
 }

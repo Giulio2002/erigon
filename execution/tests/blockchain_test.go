@@ -992,11 +992,11 @@ func TestEIP161AccountRemoval(t *testing.T) {
 		)
 		switch i {
 		case 0:
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), theAddr.Value(), new(uint256.Int), 21000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), theAddr, new(uint256.Int), 21000, new(uint256.Int), nil), *signer, key)
 		case 1:
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), theAddr.Value(), new(uint256.Int), 21000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), theAddr, new(uint256.Int), 21000, new(uint256.Int), nil), *signer, key)
 		case 2:
-			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), theAddr.Value(), new(uint256.Int), 21000, new(uint256.Int), nil), *signer, key)
+			txn, err = types.SignTx(types.NewTransaction(block.TxNonce(address), theAddr, new(uint256.Int), 21000, new(uint256.Int), nil), *signer, key)
 		}
 		if err != nil {
 			t.Fatal(err)
@@ -1494,7 +1494,7 @@ func TestDeleteRecreateSlots(t *testing.T) {
 		Alloc: types.GenesisAlloc{
 			address: {Balance: funds},
 			// The address 0xAAAAA selfdestructs if called
-			aa.Value(): {
+			aa: {
 				// Code needs to just selfdestruct
 				Code:    aaCode,
 				Nonce:   1,
@@ -1512,7 +1512,7 @@ func TestDeleteRecreateSlots(t *testing.T) {
 	chain, err := blockgen.GenerateChain(m.ChainConfig, m.Genesis, m.Engine, m.DB, 1, func(i int, b *blockgen.BlockGen) {
 		b.SetCoinbase(common.Address{1})
 		// One transaction to AA, to kill it
-		tx, _ := types.SignTx(types.NewTransaction(0, aa.Value(),
+		tx, _ := types.SignTx(types.NewTransaction(0, aa,
 			&u256.Num0, 50000, &u256.Num1, nil), *types.LatestSignerForChainID(nil), key)
 		b.AddTx(tx)
 		// One transaction to BB, to recreate AA
@@ -1617,7 +1617,7 @@ func TestCVE2020_26265(t *testing.T) {
 		Alloc: types.GenesisAlloc{
 			address: {Balance: funds},
 			// The address 0xAAAAA selfdestructs if called
-			aa.Value(): {
+			aa: {
 				// Code needs to just selfdestruct
 				Code:    aaCode,
 				Nonce:   1,
@@ -1642,7 +1642,7 @@ func TestCVE2020_26265(t *testing.T) {
 			&u256.Num0, 100000, &u256.Num1, nil), *types.LatestSignerForChainID(nil), key)
 		b.AddTx(tx)
 		// One transaction to AA, to recreate it (but without storage
-		tx, _ = types.SignTx(types.NewTransaction(1, aa.Value(),
+		tx, _ = types.SignTx(types.NewTransaction(1, aa,
 			new(uint256.Int).SetUint64(5), 100000, &u256.Num1, nil), *types.LatestSignerForChainID(nil), key)
 		b.AddTx(tx)
 	})
@@ -1698,7 +1698,7 @@ func TestDeleteRecreateAccount(t *testing.T) {
 		Alloc: types.GenesisAlloc{
 			address: {Balance: funds},
 			// The address 0xAAAAA selfdestructs if called
-			aa.Value(): {
+			aa: {
 				// Code needs to just selfdestruct
 				Code:    aaCode,
 				Nonce:   1,
@@ -1712,11 +1712,11 @@ func TestDeleteRecreateAccount(t *testing.T) {
 	chain, err := blockgen.GenerateChain(m.ChainConfig, m.Genesis, m.Engine, m.DB, 1, func(i int, b *blockgen.BlockGen) {
 		b.SetCoinbase(common.Address{1})
 		// One transaction to AA, to kill it
-		tx, _ := types.SignTx(types.NewTransaction(0, aa.Value(),
+		tx, _ := types.SignTx(types.NewTransaction(0, aa,
 			&u256.Num0, 50000, &u256.Num1, nil), *types.LatestSignerForChainID(nil), key)
 		b.AddTx(tx)
 		// One transaction to AA, to recreate it (but without storage
-		tx, _ = types.SignTx(types.NewTransaction(1, aa.Value(),
+		tx, _ = types.SignTx(types.NewTransaction(1, aa,
 			&u256.Num1, 100000, &u256.Num1, nil), *types.LatestSignerForChainID(nil), key)
 		b.AddTx(tx)
 	})
@@ -1825,7 +1825,7 @@ func TestDeleteRecreateSlotsAcrossManyBlocks(t *testing.T) {
 		Alloc: types.GenesisAlloc{
 			address: {Balance: funds},
 			// The address 0xAAAAA selfdestructs if called
-			aa.Value(): {
+			aa: {
 				// Code needs to just selfdestruct
 				Code:    aaCode,
 				Nonce:   1,
@@ -1854,7 +1854,7 @@ func TestDeleteRecreateSlotsAcrossManyBlocks(t *testing.T) {
 	}
 	var expectations []*expectation
 	var newDestruct = func(e *expectation) types.Transaction {
-		tx, _ := types.SignTx(types.NewTransaction(nonce, aa.Value(),
+		tx, _ := types.SignTx(types.NewTransaction(nonce, aa,
 			&u256.Num0, 50000, &u256.Num1, nil), *types.LatestSignerForChainID(nil), key)
 		nonce++
 		if e.exist {
@@ -2031,7 +2031,7 @@ func TestInitThenFailCreateContract(t *testing.T) {
 		Alloc: types.GenesisAlloc{
 			address: {Balance: funds},
 			// The address aa has some funds
-			aa.Value(): {Balance: big.NewInt(100000)},
+			aa: {Balance: big.NewInt(100000)},
 			// The contract BB tries to create code onto AA
 			bb: {
 				Code:    bbCode,
@@ -2207,8 +2207,8 @@ func TestEIP1559Transition(t *testing.T) {
 		gspec   = &types.Genesis{
 			Config: chainspec.Sepolia.Config,
 			Alloc: types.GenesisAlloc{
-				addr1.Value(): {Balance: funds.ToBig()},
-				addr2.Value(): {Balance: funds.ToBig()},
+				addr1: {Balance: funds.ToBig()},
+				addr2: {Balance: funds.ToBig()},
 				// The address 0xAAAA sloads 0x00 and 0x01
 				aa: {
 					Code: []byte{
